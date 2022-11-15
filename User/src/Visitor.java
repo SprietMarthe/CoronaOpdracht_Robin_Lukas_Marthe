@@ -20,5 +20,8 @@ public class Visitor {
         }
     }
 
+    public static void main(String[] args) {
+        Visitor visitor = new Visitor();
+    }
 
 }
