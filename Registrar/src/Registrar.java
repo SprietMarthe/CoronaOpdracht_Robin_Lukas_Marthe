@@ -8,7 +8,7 @@ public class Registrar {
         try {
             Registry registry = LocateRegistry.createRegistry(1099);
 
-            registry.rebind("Enrollment", new ChatServiceImpl());
+            registry.rebind("Enrollment", new EnrollmentImpl());
         }
         catch (Exception e) {
             e.printStackTrace();
