@@ -8,23 +8,52 @@ public class BarOwner {
     String name, address;
     Scanner sc;
     public BarOwner(){
-       System.out.println("Give business number, name, address2");
-//        sc = new Scanner(System.in);
-//        this.businessNumber = Integer.parseInt(sc.next());
-//        this.name = sc.next();
-//        this.address = sc.next();
+        sc = new Scanner(System.in);
+        System.out.println("Enter unique name");
+        this.name = sc.nextLine();
+        System.out.println("Enter unique business number");
+        this.businessNumber = Integer.parseInt(sc.next());
+        System.out.println("Enter unique address");
+        this.address = sc.next();
+        System.out.println("Done!");
+
         try {
             // fire to localhost port 1099
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
             enrollment = (Enrollment) myRegistry.lookup("Enrollment");
-            System.out.println("print hello");
-            String response = enrollment.helloTo("Marthe");
+
+            String response = enrollment.helloTo(name, businessNumber, address);
             System.out.println(response);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        sc.close();
+    }
+
+    public static void main(String[] args) {
+        printMenu();
+    }
+
+    private static void printMenu() {
+        Scanner s = new Scanner(System.in);
+        int choice = 0;
+        while (choice != -1) {
+            System.out.println();
+            System.out.println("1.Exit");
+            System.out.println("2.Enroll");
+            System.out.println("Enter your choice");
+            choice = s.nextInt();
+            switch (choice) {
+                case 1:
+                    choice = -1;
+                    break;
+                case 2:
+                    System.out.println("-----Enroll BarOwner-----");
+                    BarOwner barOwner = new BarOwner();
+                    break;
+            }
+        }
+        s.close();
     }
 
 }
