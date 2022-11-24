@@ -1,14 +1,18 @@
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
 
-public class BarOwner {
+public class CateringImpl extends UnicastRemoteObject implements Catering {
+
     Enrollment enrollment = null;
     int businessNumber;
     String name, address;
     Scanner sc;
-    public BarOwner(){
+
+    public CateringImpl() throws RemoteException {
+
         sc = new Scanner(System.in);
         System.out.println("Enter unique name");
         this.name = sc.nextLine();
@@ -26,19 +30,23 @@ public class BarOwner {
             String response = enrollment.helloTo(name, businessNumber, address);
             System.out.println(response);
 
-//            BarOwnerCallback barowner = new BarOwnerCallbackImpl();
-//            enrollment.register(barowner);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void main(String[] args) {
+    //stuur een referentie naar onze eigen interface door naar de server zodat deze ons ook kan contacteren
+    public void register() throws RemoteException {
+        enrollment.register(this);
+    }
+
+
+
+    public static void main(String[] args) throws RemoteException {
         printMenu();
     }
 
-    private static void printMenu() {
+    private static void printMenu() throws RemoteException {
         Scanner s = new Scanner(System.in);
         int choice = 0;
         while (choice != -1) {
@@ -53,11 +61,16 @@ public class BarOwner {
                     break;
                 case 2:
                     System.out.println("-----Enroll BarOwner-----");
-                    BarOwner barOwner = new BarOwner();
+                    CateringImpl catering = new CateringImpl();
+                    catering.register();
                     break;
             }
         }
         s.close();
     }
 
+    @Override
+    public void printName() throws RemoteException {
+        System.out.println(name);
+    }
 }

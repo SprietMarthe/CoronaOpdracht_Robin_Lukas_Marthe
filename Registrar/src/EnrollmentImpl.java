@@ -3,9 +3,12 @@ import javax.crypto.SecretKey;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EnrollmentImpl extends UnicastRemoteObject implements Enrollment{
     private SecretKey s_CF_Day;
+    List<Catering> barowners = new ArrayList<>();
 
 
     protected EnrollmentImpl() throws RemoteException {
@@ -33,5 +36,17 @@ public class EnrollmentImpl extends UnicastRemoteObject implements Enrollment{
     @Override
     public void getPseudonym() throws RemoteException {
 
+    }
+
+    @Override
+    public void register(Catering barowner) throws RemoteException{
+        barowners.add(barowner);
+        barowners.forEach(b-> {
+            try {
+                b.printName();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

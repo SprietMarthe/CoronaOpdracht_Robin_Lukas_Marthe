@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Bar/Bar.iml" filepath="$PROJECT_DIR$/Bar/Bar.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CF/CF.iml" filepath="$PROJECT_DIR$/CF/CF.iml" />
       <module fileurl="file://$PROJECT_DIR$/CoronaOpdracht_Robin_Lukas_Marthe.iml" filepath="$PROJECT_DIR$/CoronaOpdracht_Robin_Lukas_Marthe.iml" />
       <module fileurl="file://$PROJECT_DIR$/MatchingService/MatchingService.iml" filepath="$PROJECT_DIR$/MatchingService/MatchingService.iml" />
       <module fileurl="file://$PROJECT_DIR$/MixingProxy/MixingProxy.iml" filepath="$PROJECT_DIR$/MixingProxy/MixingProxy.iml" />

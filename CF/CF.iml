@@ -8,6 +8,5 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Bar" />
-    <orderEntry type="module" module-name="CF" />
   </component>
 </module>
