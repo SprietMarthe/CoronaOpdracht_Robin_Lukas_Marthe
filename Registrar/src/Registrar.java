@@ -34,8 +34,7 @@ public class Registrar {
         //AES key with the size of n (128, 192, and 256) bits
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(n);
-        SecretKey key = keyGenerator.generateKey();
-        return key;
+        return keyGenerator.generateKey();
     }
 
     public static void main(String[] args) {

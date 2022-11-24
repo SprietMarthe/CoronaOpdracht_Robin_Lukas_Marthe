@@ -22,8 +22,7 @@ public class EnrollmentImpl extends UnicastRemoteObject implements Enrollment{
     private SecretKey generateBarOwnerKey(String name, int businessNumber, String address) throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(256);
-        SecretKey key = keyGenerator.generateKey();
-        return key;
+        return keyGenerator.generateKey();
     }
 
     @Override
