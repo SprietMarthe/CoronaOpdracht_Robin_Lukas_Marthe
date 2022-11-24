@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class CateringImpl extends UnicastRemoteObject implements Catering {
 
-    Enrollment enrollment = null;
+    Registrar registrar;
     int businessNumber;
     String name, address;
     Scanner sc;
@@ -25,9 +25,9 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
         try {
             // fire to localhost port 1099
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
-            enrollment = (Enrollment) myRegistry.lookup("Enrollment");
+            registrar = (Registrar) myRegistry.lookup("Registrar");
 
-            String response = enrollment.helloTo(name, businessNumber, address);
+            String response = registrar.helloTo(name, businessNumber, address);
             System.out.println(response);
 
         } catch (Exception e) {
@@ -37,7 +37,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
 
     //stuur een referentie naar onze eigen interface door naar de server zodat deze ons ook kan contacteren
     public void register() throws RemoteException {
-        enrollment.register(this);
+        registrar.register(this);
     }
 
 
@@ -70,7 +70,12 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
     }
 
     @Override
-    public void printName() throws RemoteException {
-        System.out.println(name);
+    public int getBusinessNumber() throws RemoteException {
+        return businessNumber;
+    }
+
+    @Override
+    public String getName() throws RemoteException {
+        return name;
     }
 }
