@@ -1,7 +1,9 @@
 import at.favre.lib.crypto.HKDF;
+import com.google.zxing.WriterException;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -55,7 +57,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         return keyGenerator.generateKey();
     }
 
-    public static void main(String[] args) throws RemoteException, NoSuchAlgorithmException {
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, WriterException {
         Scanner sc = new Scanner(System.in);
         RegistrarImpl registrar = new RegistrarImpl();
         registrar.startRegistrar();
@@ -81,11 +83,11 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     }
 
     //elke dag voor elke caterer een nieuwe secret key generaten //TODO dagelijks oproepen
-    public void genSecretKeysAndPseudonym() throws RemoteException {
+    public void genSecretKeysAndPseudonym() throws IOException, WriterException {
         for(Catering caterer : caterers.values()){
-            String data = caterer.getData();
+            String CF = caterer.getCF();
             String location = caterer.getLocation();
-            byte[] expandedAesKey = hkdf.expand(masterSecretKey, data.getBytes(StandardCharsets.UTF_8), 16);
+            byte[] expandedAesKey = hkdf.expand(masterSecretKey, CF.getBytes(StandardCharsets.UTF_8), 16);
             caterer.setSecretKey(expandedAesKey);
 
             md.update(location.getBytes(StandardCharsets.UTF_8));
