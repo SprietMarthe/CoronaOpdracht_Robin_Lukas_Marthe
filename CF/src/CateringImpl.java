@@ -2,6 +2,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class CateringImpl extends UnicastRemoteObject implements Catering {
@@ -10,6 +11,8 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
     int businessNumber;
     String name, address;
     Scanner sc;
+    byte[] secretKey;
+    byte[] pseudonym;
 
     public CateringImpl() throws RemoteException {
 
@@ -49,10 +52,15 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
     private static void printMenu() throws RemoteException {
         Scanner s = new Scanner(System.in);
         int choice = 0;
+        System.out.println("-----Enroll BarOwner-----");
+        CateringImpl catering = new CateringImpl();
+        catering.register();
+
         while (choice != -1) {
             System.out.println();
             System.out.println("1.Exit");
-            System.out.println("2.Enroll");
+            System.out.println("2. Print secret key");
+            System.out.println("3. Print pseudonym");
             System.out.println("Enter your choice");
             choice = s.nextInt();
             switch (choice) {
@@ -60,10 +68,10 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
                     choice = -1;
                     break;
                 case 2:
-                    System.out.println("-----Enroll BarOwner-----");
-                    CateringImpl catering = new CateringImpl();
-                    catering.register();
+                    System.out.println(Arrays.toString(catering.secretKey));
                     break;
+                case 3:
+                    System.out.println(Arrays.toString(catering.pseudonym));
             }
         }
         s.close();
@@ -77,5 +85,25 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
     @Override
     public String getName() throws RemoteException {
         return name;
+    }
+
+    @Override
+    public void setSecretKey(byte[] secretKey) throws RemoteException {
+        this.secretKey = secretKey;
+    }
+
+    @Override
+    public String getData() throws RemoteException {
+        return businessNumber + name + address;
+    }
+
+    @Override
+    public String getLocation() throws RemoteException {
+        return address;
+    }
+
+    @Override
+    public void setPseudonym(byte[] pseudonym) throws RemoteException {
+        this.pseudonym = pseudonym;
     }
 }

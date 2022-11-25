@@ -1,9 +1,13 @@
+import at.favre.lib.crypto.HKDF;
+
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
@@ -17,8 +21,12 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     private SecretKey s_CF_Day;
     //map met alle geregistreerde caterers met key hun bedrijfsnummer
     private Map<Integer, Catering> caterers;
+    //key derivation functie om secretkey te genereren
+    HKDF hkdf = HKDF.fromHmacSha256();
+    //hashing functie om pseudoniem te genereren
+    MessageDigest md = MessageDigest.getInstance("SHA-256");
 
-    protected RegistrarImpl() throws RemoteException {
+    protected RegistrarImpl() throws RemoteException, NoSuchAlgorithmException {
         caterers = new HashMap<>();
     }
 
@@ -47,18 +55,21 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         return keyGenerator.generateKey();
     }
 
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String[] args) throws RemoteException, NoSuchAlgorithmException {
         Scanner sc = new Scanner(System.in);
         RegistrarImpl registrar = new RegistrarImpl();
         registrar.startRegistrar();
         while(true){
             System.out.println("1: Print Caterers");
+            System.out.println("2: Generate secret keys + pseudonym");
             System.out.println("Enter your choice.");
             int i = sc.nextInt();
             switch (i){
                 case 1:
                     registrar.printCaterers();
                     break;
+                case 2:
+                    registrar.genSecretKeysAndPseudonym();
             }
         }
     }
@@ -68,6 +79,21 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
             System.out.println(c.getName());
         }
     }
+
+    //elke dag voor elke caterer een nieuwe secret key generaten //TODO dagelijks oproepen
+    public void genSecretKeysAndPseudonym() throws RemoteException {
+        for(Catering caterer : caterers.values()){
+            String data = caterer.getData();
+            String location = caterer.getLocation();
+            byte[] expandedAesKey = hkdf.expand(masterSecretKey, data.getBytes(StandardCharsets.UTF_8), 16);
+            caterer.setSecretKey(expandedAesKey);
+
+            md.update(location.getBytes(StandardCharsets.UTF_8));
+            byte[] digest = md.digest();
+            caterer.setPseudonym(digest);
+        }
+    }
+
     @Override
     public String helloTo(String name, int businessNumber, String address) throws RemoteException, NoSuchAlgorithmException {
         System.err.println(name + " is trying to contact!");
