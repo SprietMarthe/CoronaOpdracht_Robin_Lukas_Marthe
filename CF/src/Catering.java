@@ -1,6 +1,4 @@
 import com.google.zxing.WriterException;
-
-import javax.management.modelmbean.RequiredModelMBean;
 import java.io.IOException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;

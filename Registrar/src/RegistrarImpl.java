@@ -102,7 +102,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         }
     }
 
-    //elke dag voor elke caterer een nieuwe secret key generaten
+    //voor elke caterer een nieuwe secret key en pseudoniem generaten
     public void genSecretKeysAndPseudonym() throws IOException, WriterException {
         for(Catering caterer : caterers.values()){
             String CF = caterer.getCF();
@@ -110,7 +110,8 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
             byte[] expandedAesKey = hkdf.expand(masterSecretKey, CF.getBytes(StandardCharsets.UTF_8), 16);
             caterer.setSecretKey(expandedAesKey);
 
-            md.update(location.getBytes(StandardCharsets.UTF_8));
+            String data = location + day;
+            md.update(data.getBytes(StandardCharsets.UTF_8));
             byte[] digest = md.digest();
             caterer.setPseudonym(digest);
         }

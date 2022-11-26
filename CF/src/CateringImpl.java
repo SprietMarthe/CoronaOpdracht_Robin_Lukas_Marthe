@@ -98,7 +98,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
         String tbhash = String.valueOf(random) + Arrays.toString(pseudonym);
         md.update(tbhash.getBytes(StandardCharsets.UTF_8));
         byte[] digest = md.digest();
-        String data = String.valueOf(random) + CF + Arrays.toString(digest);
+        String data = String.valueOf(random) + "/" + CF + "/" + Arrays.toString(digest);
         BitMatrix matrix = new MultiFormatWriter().encode(
                 new String(data.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8),
                 BarcodeFormat.QR_CODE, 200, 200);
