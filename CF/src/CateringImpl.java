@@ -46,7 +46,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
             registrar = (Registrar) myRegistry.lookup("Registrar");
 
-            String response = registrar.helloTo(name, businessNumber, address);
+            String response = registrar.helloTo(name);
             System.out.println(response);
 
         } catch (Exception e) {
@@ -58,8 +58,6 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
     public void register() throws RemoteException {
         registrar.register(this);
     }
-
-
 
     public static void main(String[] args) throws RemoteException, NoSuchAlgorithmException {
         printMenu();
@@ -96,7 +94,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
     //qr code generaten van random nummer, identifier en hash van pseudonym met randon nummer
     public void genQRCode() throws IOException, WriterException {
         Random rand = new Random();
-        int random = rand.nextInt(100);
+        int random = rand.nextInt(1000);
         String tbhash = String.valueOf(random) + Arrays.toString(pseudonym);
         md.update(tbhash.getBytes(StandardCharsets.UTF_8));
         byte[] digest = md.digest();
@@ -111,6 +109,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
                 matrix,
                 path.substring(path.lastIndexOf('.') + 1),
                 new File(path));
+        System.out.println("qr code output: " + data);
     }
 
     @Override
