@@ -43,11 +43,13 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             registrar = (Registrar) myRegistry.lookup("Registrar");
             registrar.register(this);
 
-            Registry registryMixing = LocateRegistry.getRegistry("localhost", 1098,
+            Registry registryMixing = LocateRegistry.getRegistry("localhost", 2019,
                     new SslRMIClientSocketFactory());
             mixer = (MixingProxy) registryMixing.lookup("MixingProxy");
-            System.out.println(mixer.sayHello() + "\n");
             mixer.register(this);
+
+            System.out.println(mixer.sayHello() + "\n");
+
 
             //TODO timer schedulen die logs verwijdert na x aantal dagen
 

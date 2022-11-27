@@ -20,7 +20,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
 
     private void startMixingProxy(){
         try {
-//            System.setProperty("java.security.policy","file:C:\\Users\\MartheSpriet\\OneDrive - KU Leuven\\Documents\\Universiteit\\Master\\GedistribueerdeSystemen2\\CoronaOpdracht_Robin_Lukas_Marthe/permissionPolicies.policy");
+//            System.setProperty("java.security.policy","file:permissionPolicies.policy");
 
 //            // fire to localhost port 1099
 //            Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
@@ -34,7 +34,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
 //        }
 
             // Create SSL-based registry
-            Registry registry = LocateRegistry.createRegistry(1098,
+            Registry registry = LocateRegistry.createRegistry(2019,
                     new SslRMIClientSocketFactory(),
                     new SslRMIServerSocketFactory());
             registry.bind("MixingProxy", this);
