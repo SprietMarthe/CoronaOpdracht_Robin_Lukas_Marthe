@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -107,13 +108,10 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             registrar = (Registrar) myRegistry.lookup("Registrar");
             registrar.register(this);
 
-//            Registry registryMixing = LocateRegistry.getRegistry("localhost", 2019,
-//                    new SslRMIClientSocketFactory());
-//            mixer = (MixingProxy) registryMixing.lookup("MixingProxy");
-//            mixer.register(this);
-//
-//            System.out.println(mixer.sayHello() + "\n");
-
+            Registry registryMixing = LocateRegistry.getRegistry("localhost", 2019,
+                    new SslRMIClientSocketFactory());
+            mixer = (MixingProxy) registryMixing.lookup("MixingProxy");
+            mixer.register(this);
 
             //TODO timer schedulen die logs verwijdert na x aantal dagen
 
@@ -123,7 +121,9 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     public static void main(String[] args) throws RemoteException {
-//        createGUI();
+        System.setProperty("javax.net.ssl.trustStore","truststore");
+        System.setProperty("javax.net.ssl.trustStorePassword","trustword");
+
         Scanner sc = new Scanner(System.in);
         VisitorImpl visitor = new VisitorImpl();
         visitor.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -218,5 +218,4 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     public void setToken(int day, int r) throws RemoteException {
         this.token = new Token(day,r);
     }
-
 }
