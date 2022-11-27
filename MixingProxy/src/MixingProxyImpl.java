@@ -14,10 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
-//    MatchingService matcher;
+    private MatchingService matcher;
     private Map<String, Visitor> visitors;
-
-
 
     protected MixingProxyImpl() throws RemoteException {
         visitors = new HashMap<>();
@@ -25,19 +23,6 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
 
     private void startMixingProxy(){
         try {
-//            System.setProperty("java.security.policy","file:permissionPolicies.policy");
-
-//            // fire to localhost port 1099
-//            Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
-//            matcher = (MatchingService) myRegistry.lookup("MatchingService");
-//            matcher.register(this);
-
-
-//        // Create and install a security manager
-//        if (System.getSecurityManager() == null) {
-//            System.setSecurityManager(new SecurityManager());
-//        }
-
             // Create SSL-based registry
             Registry registry = LocateRegistry.createRegistry(2019,
                     new SslRMIClientSocketFactory(),
@@ -50,7 +35,8 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         }
     }
 
-    public static void main(String[] args) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+    public static void main(String[] args) throws IOException {
+        //http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/JSSERefGuide.html#CreateKeystore gevolgde tutorial
         System.setProperty("javax.net.ssl.keyStore","keystore");
         System.setProperty("javax.net.ssl.keyStorePassword","password");
         MixingProxyImpl mixingProxy = new MixingProxyImpl();
@@ -58,12 +44,12 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
     }
 
     @Override
-    public String sayHello() throws RemoteException {
-        return "Hello World!";
+    public void register(Visitor visitor)throws RemoteException {
+        visitors.put(visitor.getNumber(), visitor);
     }
 
     @Override
-    public void register(Visitor visitor)throws RemoteException {
-        visitors.put(visitor.getNumber(), visitor);
+    public void register(MatchingService matcher) throws RemoteException {
+        this.matcher = matcher;
     }
 }

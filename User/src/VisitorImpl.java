@@ -34,9 +34,6 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     MixingProxy mixer;
 
     public VisitorImpl() throws RemoteException {
-//        super(1098,
-//                new SslRMIClientSocketFactory(),
-//                new SslRMIServerSocketFactory());
         try {
             // fire to localhost port 1099
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
@@ -47,9 +44,6 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
                     new SslRMIClientSocketFactory());
             mixer = (MixingProxy) registryMixing.lookup("MixingProxy");
             mixer.register(this);
-
-            System.out.println(mixer.sayHello() + "\n");
-
 
             //TODO timer schedulen die logs verwijdert na x aantal dagen
 

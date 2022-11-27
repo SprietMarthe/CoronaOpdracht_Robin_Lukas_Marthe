@@ -12,5 +12,6 @@
     <orderEntry type="library" name="Maven: com.google.zxing:core:3.3.0" level="project" />
     <orderEntry type="module" module-name="User" />
     <orderEntry type="module" module-name="MixingProxy" />
+    <orderEntry type="module" module-name="MatchingService" />
   </component>
 </module>
