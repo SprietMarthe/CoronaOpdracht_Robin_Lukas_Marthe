@@ -1,3 +1,4 @@
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -8,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
-import java.net.SocketPermission;
 
 //klasse om gescande QR code te loggen
 class Location {
@@ -31,13 +31,23 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     Token token;
     //data verkregen uit QR code
     List<Location> logs = new ArrayList<>();
+    MixingProxy mixer;
 
     public VisitorImpl() throws RemoteException {
+//        super(1098,
+//                new SslRMIClientSocketFactory(),
+//                new SslRMIServerSocketFactory());
         try {
             // fire to localhost port 1099
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
             registrar = (Registrar) myRegistry.lookup("Registrar");
             registrar.register(this);
+
+            Registry registryMixing = LocateRegistry.getRegistry("localhost", 1098,
+                    new SslRMIClientSocketFactory());
+            mixer = (MixingProxy) registryMixing.lookup("MixingProxy");
+            System.out.println(mixer.sayHello() + "\n");
+            mixer.register(this);
 
             //TODO timer schedulen die logs verwijdert na x aantal dagen
 
