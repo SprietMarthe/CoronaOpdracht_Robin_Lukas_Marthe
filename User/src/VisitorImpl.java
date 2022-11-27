@@ -92,7 +92,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     @Override
-    public void setToken(Token token) throws RemoteException {
-        this.token = token;
+    public void setToken(int day, int r) throws RemoteException {
+        this.token = new Token(day,r);
     }
 }

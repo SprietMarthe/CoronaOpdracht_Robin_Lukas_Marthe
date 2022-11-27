@@ -123,7 +123,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         for(Map.Entry<String, Visitor> e : visitors.entrySet()){
             int r = rand.nextInt();
             Token t = new Token(day, r);
-            e.getValue().setToken(t);
+            e.getValue().setToken(day,r);
             visitortokenmap.get(e.getKey()).add(t);
         }
     }
