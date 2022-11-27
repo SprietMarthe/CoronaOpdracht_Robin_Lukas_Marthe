@@ -150,4 +150,9 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         visitortokenmap.put(visitor.getNumber(), new ArrayList<>());
         //TODO geef initiele tokens door
     }
+
+    @Override
+    public void register(MatchingService matcher) throws RemoteException {
+
+    }
 }

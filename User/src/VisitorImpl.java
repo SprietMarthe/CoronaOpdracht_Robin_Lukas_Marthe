@@ -183,14 +183,10 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     public void scanQRCodeFromGUI(){
-        System.out.println("QR Code:" + QRTextField.getText());
         if(!Objects.equals(QRTextField.getText(), "")){
             int random = Integer.parseInt(QRTextField.getText().split("/")[0]);
-            System.out.println("random: " + random);
             String CF = QRTextField.getText().split("/")[1];
-            System.out.println("CF: " + CF);
             byte[] hash = QRTextField.getText().split("/")[2].getBytes(StandardCharsets.UTF_8);
-            System.out.println("hash: " + hash.toString());
             Location l = new Location(random, CF, hash);
             // location maar 1 keer toevoegen
             if (!logs.contains(l)){
@@ -201,6 +197,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     public void sendCapsule(byte[] hash){
+        System.out.println("hash: " + hash.toString());
         //TODO stuur capsule naar mixing server/proxy
     }
 
