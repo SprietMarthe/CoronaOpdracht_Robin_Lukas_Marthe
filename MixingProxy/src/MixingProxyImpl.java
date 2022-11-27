@@ -1,10 +1,15 @@
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +50,9 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+        System.setProperty("javax.net.ssl.keyStore","keystore");
+        System.setProperty("javax.net.ssl.keyStorePassword","password");
         MixingProxyImpl mixingProxy = new MixingProxyImpl();
         mixingProxy.startMixingProxy();
     }

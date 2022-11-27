@@ -59,6 +59,9 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     public static void main(String[] args) throws RemoteException {
+        System.setProperty("javax.net.ssl.trustStore","truststore");
+        System.setProperty("javax.net.ssl.trustStorePassword","trustword");
+
         Scanner sc = new Scanner(System.in);
         VisitorImpl visitor = new VisitorImpl();
         System.out.println("Enter name:");
