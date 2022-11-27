@@ -6,7 +6,9 @@ import java.rmi.server.UnicastRemoteObject;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
+import java.net.SocketPermission;
 
 //klasse om gescande QR code te loggen
 class Location {
@@ -14,6 +16,7 @@ class Location {
     String CF;
     byte[] hash;
     LocalDateTime date = LocalDateTime.now();
+
     Location(int random, String CF, byte[] hash){
         this.random = random;
         this.CF = CF;
@@ -48,7 +51,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         VisitorImpl visitor = new VisitorImpl();
         System.out.println("Enter name:");
         visitor.name = sc.nextLine();
-        System.out.println("Enter phone number:");
+        System.out.println("Enter unique phone number:");
         visitor.number = sc.nextLine();
         System.out.println("succesfully signed up!");
         int i = 0;
@@ -69,16 +72,21 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter input");
         input = sc.nextLine();
-        int random = Integer.parseInt(input.split("/")[0]);
-        String CF = input.split("/")[1];
-        byte[] hash = input.split("/")[2].getBytes(StandardCharsets.UTF_8);
-        logs.add(new Location(random, CF, hash));
-
-        sendCapsule(hash);
+        if(!Objects.equals(input, "")){
+            int random = Integer.parseInt(input.split("/")[0]);
+            String CF = input.split("/")[1];
+            byte[] hash = input.split("/")[2].getBytes(StandardCharsets.UTF_8);
+            Location l = new Location(random, CF, hash);
+            // location maar 1 keer toevoegen
+            if (!logs.contains(l)){
+                logs.add(l);
+            }
+            sendCapsule(hash);
+        }
     }
 
     public void sendCapsule(byte[] hash){
-        //TODO stuur capsule naar mixing server
+        //TODO stuur capsule naar mixing server/proxy
     }
 
     @Override
