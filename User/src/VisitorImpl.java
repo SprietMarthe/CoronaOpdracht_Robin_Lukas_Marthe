@@ -1,4 +1,7 @@
-import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -33,7 +36,68 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     List<Location> logs = new ArrayList<>();
     MixingProxy mixer;
 
+    JFrame frame = new JFrame("Visitor");
+    JTextField NameTextField = new JTextField();
+    JTextField PhoneTextField = new JTextField();
+    JTextField QRTextField = new JTextField();
+    JButton logInButton = new JButton("Log in");
+    JButton scanQRCodeButton = new JButton("Scan QR code");
+    JLabel PhoneLabel = new JLabel("Unique phone number");
+    JLabel NameLabel = new JLabel("Name");
+    JLabel QRLabel = new JLabel("QR code");
+
     public VisitorImpl() throws RemoteException {
+//        VisitorLogInUI ui = new VisitorLogInUI(this);
+//        JPanel root = ui.getRootPanel();
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setBounds(0,0,600,400);
+
+        NameLabel.setBounds(0,0, 10, 10);
+        PhoneLabel.setBounds(50,100, 10, 10);
+        NameTextField.setVisible(true);
+        PhoneTextField.setVisible(true);
+        QRLabel.setVisible(false);
+        QRTextField.setVisible(false);
+        frame.getContentPane().add(NameLabel);
+        frame.getContentPane().add(NameTextField);
+        frame.getContentPane().add(PhoneLabel);
+        frame.getContentPane().add(PhoneTextField);
+//        frame.getContentPane().add();
+        frame.getContentPane().add(logInButton);
+        frame.getContentPane().add(QRLabel);
+        frame.getContentPane().add(QRTextField);
+        frame.getContentPane().add(scanQRCodeButton);
+
+
+//        frame.getContentPane().add(NameLabel, BorderLayout.SOUTH);
+//        frame.getContentPane().add(NameTextField, BorderLayout.CENTER);
+        frame.setLayout(new GridLayout(4,2));
+        frame.setSize(600,400);
+        scanQRCodeButton.setVisible(false);
+        NameTextField.setEditable(true);
+        scanQRCodeButton.setVisible(false);
+        PhoneTextField.setEditable(true);
+        frame.pack();
+        frame.setLocationRelativeTo(null); // center
+
+        frame.setVisible(true);
+        frame.pack();
+
+        logInButton.addActionListener(new ActionListener(){    //add an event and take action
+            public void actionPerformed(ActionEvent e){
+                try {
+                    tryLogIn();
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        scanQRCodeButton.addActionListener(new ActionListener(){    //add an event and take action
+            public void actionPerformed(ActionEvent e){
+                scanQRCodeFromGUI();
+            }
+        });
 //        super(1098,
 //                new SslRMIClientSocketFactory(),
 //                new SslRMIServerSocketFactory());
@@ -43,12 +107,12 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             registrar = (Registrar) myRegistry.lookup("Registrar");
             registrar.register(this);
 
-            Registry registryMixing = LocateRegistry.getRegistry("localhost", 2019,
-                    new SslRMIClientSocketFactory());
-            mixer = (MixingProxy) registryMixing.lookup("MixingProxy");
-            mixer.register(this);
-
-            System.out.println(mixer.sayHello() + "\n");
+//            Registry registryMixing = LocateRegistry.getRegistry("localhost", 2019,
+//                    new SslRMIClientSocketFactory());
+//            mixer = (MixingProxy) registryMixing.lookup("MixingProxy");
+//            mixer.register(this);
+//
+//            System.out.println(mixer.sayHello() + "\n");
 
 
             //TODO timer schedulen die logs verwijdert na x aantal dagen
@@ -59,8 +123,11 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     public static void main(String[] args) throws RemoteException {
+//        createGUI();
         Scanner sc = new Scanner(System.in);
         VisitorImpl visitor = new VisitorImpl();
+        visitor.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        visitor.frame.setVisible(true);
         System.out.println("Enter name:");
         visitor.name = sc.nextLine();
         System.out.println("Enter unique phone number:");
@@ -79,6 +146,23 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         }
     }
 
+    private void tryLogIn() throws RemoteException {
+        if(!Objects.equals(NameTextField, "") && !Objects.equals(PhoneTextField, "")){
+//            System.out.println("name:" + NameTextField.getText());
+//            System.out.println("phone:" + PhoneTextField.getText());
+            this.name = NameTextField.getText();
+            this.number = PhoneTextField.getText();
+            frame.remove(PhoneTextField);
+            frame.remove(PhoneLabel);
+            frame.remove(NameLabel);
+            frame.remove(NameTextField);
+            frame.remove(logInButton);
+            QRLabel.setVisible(true);
+            QRTextField.setVisible(true);
+            scanQRCodeButton.setVisible(true);
+        }
+    }
+
     public void scanQRCode(){
         String input;
         Scanner sc = new Scanner(System.in);
@@ -88,6 +172,25 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             int random = Integer.parseInt(input.split("/")[0]);
             String CF = input.split("/")[1];
             byte[] hash = input.split("/")[2].getBytes(StandardCharsets.UTF_8);
+            Location l = new Location(random, CF, hash);
+            // location maar 1 keer toevoegen
+            if (!logs.contains(l)){
+                logs.add(l);
+            }
+            System.out.println("logs:" + logs);
+            sendCapsule(hash);
+        }
+    }
+
+    public void scanQRCodeFromGUI(){
+        System.out.println("QR Code:" + QRTextField.getText());
+        if(!Objects.equals(QRTextField.getText(), "")){
+            int random = Integer.parseInt(QRTextField.getText().split("/")[0]);
+            System.out.println("random: " + random);
+            String CF = QRTextField.getText().split("/")[1];
+            System.out.println("CF: " + CF);
+            byte[] hash = QRTextField.getText().split("/")[2].getBytes(StandardCharsets.UTF_8);
+            System.out.println("hash: " + hash.toString());
             Location l = new Location(random, CF, hash);
             // location maar 1 keer toevoegen
             if (!logs.contains(l)){
@@ -115,4 +218,5 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     public void setToken(int day, int r) throws RemoteException {
         this.token = new Token(day,r);
     }
+
 }
