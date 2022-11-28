@@ -9,10 +9,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
 
 //klasse om gescande QR code te loggen
 class Location {
@@ -48,9 +46,27 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     JLabel QRLabel = new JLabel("QR code");
 
     public VisitorImpl() throws RemoteException {
-//        VisitorLogInUI ui = new VisitorLogInUI(this);
-//        JPanel root = ui.getRootPanel();
+        setFrame();
 
+        try {
+            // fire to localhost port 1099
+            Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
+            registrar = (Registrar) myRegistry.lookup("Registrar");
+            registrar.register(this);
+
+            Registry registryMixing = LocateRegistry.getRegistry("localhost", 2019,
+                    new SslRMIClientSocketFactory());
+            mixer = (MixingProxy) registryMixing.lookup("MixingProxy");
+            mixer.register(this);
+
+            //TODO timer schedulen die logs verwijdert na x aantal dagen
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setFrame() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setBounds(0,0,600,400);
 
@@ -64,15 +80,12 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         frame.getContentPane().add(NameTextField);
         frame.getContentPane().add(PhoneLabel);
         frame.getContentPane().add(PhoneTextField);
-//        frame.getContentPane().add();
         frame.getContentPane().add(logInButton);
         frame.getContentPane().add(QRLabel);
         frame.getContentPane().add(QRTextField);
         frame.getContentPane().add(scanQRCodeButton);
 
 
-//        frame.getContentPane().add(NameLabel, BorderLayout.SOUTH);
-//        frame.getContentPane().add(NameTextField, BorderLayout.CENTER);
         frame.setLayout(new GridLayout(4,2));
         frame.setSize(600,400);
         scanQRCodeButton.setVisible(false);
@@ -96,28 +109,14 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         });
         scanQRCodeButton.addActionListener(new ActionListener(){    //add an event and take action
             public void actionPerformed(ActionEvent e){
-                scanQRCodeFromGUI();
+                try {
+                    scanQRCodeFromGUI();
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
-//        super(1098,
-//                new SslRMIClientSocketFactory(),
-//                new SslRMIServerSocketFactory());
-        try {
-            // fire to localhost port 1099
-            Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
-            registrar = (Registrar) myRegistry.lookup("Registrar");
-            registrar.register(this);
 
-            Registry registryMixing = LocateRegistry.getRegistry("localhost", 2019,
-                    new SslRMIClientSocketFactory());
-            mixer = (MixingProxy) registryMixing.lookup("MixingProxy");
-            mixer.register(this);
-
-            //TODO timer schedulen die logs verwijdert na x aantal dagen
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public static void main(String[] args) throws RemoteException {
@@ -128,22 +127,22 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         VisitorImpl visitor = new VisitorImpl();
         visitor.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         visitor.frame.setVisible(true);
-        System.out.println("Enter name:");
-        visitor.name = sc.nextLine();
-        System.out.println("Enter unique phone number:");
-        visitor.number = sc.nextLine();
-        System.out.println("succesfully signed up!");
-        int i = 0;
-        while(true){
-            System.out.println("1. Scan QR Code");
-            System.out.println("Enter your choice");
-            i = sc.nextInt();
-            switch(i){
-                case 1:
-                    visitor.scanQRCode();
-                    break;
-            }
-        }
+//        System.out.println("Enter name:");
+//        visitor.name = sc.nextLine();
+//        System.out.println("Enter unique phone number:");
+//        visitor.number = sc.nextLine();
+//        System.out.println("succesfully signed up!");
+//        int i = 0;
+//        while(true){
+//            System.out.println("1. Scan QR Code");
+//            System.out.println("Enter your choice");
+//            i = sc.nextInt();
+//            switch(i){
+//                case 1:
+//                    visitor.scanQRCode();
+//                    break;
+//            }
+//        }
     }
 
     private void tryLogIn() throws RemoteException {
@@ -163,7 +162,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         }
     }
 
-    public void scanQRCode(){
+    public void scanQRCode() throws RemoteException {
         String input;
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter input");
@@ -182,7 +181,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         }
     }
 
-    public void scanQRCodeFromGUI(){
+    public void scanQRCodeFromGUI() throws RemoteException {
         if(!Objects.equals(QRTextField.getText(), "")){
             int random = Integer.parseInt(QRTextField.getText().split("/")[0]);
             String CF = QRTextField.getText().split("/")[1];
@@ -194,22 +193,22 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             }
             sendCapsule(hash);
         }
+        QRTextField.setText("");
     }
 
-    public void sendCapsule(byte[] hash){
-        System.out.println("hash: " + hash.toString());
-        //TODO stuur capsule naar mixing server/proxy
+    public void sendCapsule(byte[] hash) throws RemoteException {
+//        System.out.println("time: " + LocalDateTime.now());
+//        System.out.println("token: " + token);
+//        System.out.println("hash: " + Arrays.toString(hash));
+        Capsule c = new Capsule(token.getRandom(), token.getDay(), hash);
+        mixer.sendCapsule(c);
     }
 
     @Override
-    public String getNumber() throws RemoteException {
-        return number;
-    }
+    public String getNumber() throws RemoteException {return number;}
 
     @Override
-    public String getName() throws RemoteException {
-        return name;
-    }
+    public String getName() throws RemoteException {return name;}
 
     @Override
     public void setToken(int day, int r) throws RemoteException {

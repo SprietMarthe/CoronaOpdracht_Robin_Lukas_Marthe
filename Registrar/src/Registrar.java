@@ -7,5 +7,4 @@ public interface Registrar extends Remote {
     public void register(Catering caterer) throws RemoteException;
     public void register(Visitor visitor) throws RemoteException;
     public void register(MatchingService matcher) throws RemoteException;
-
 }

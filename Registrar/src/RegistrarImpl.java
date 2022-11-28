@@ -11,6 +11,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /*
@@ -28,7 +29,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     private final HKDF hkdf = HKDF.fromHmacSha256();
     //hashing functie om pseudoniem te genereren
     private final MessageDigest md = MessageDigest.getInstance("SHA-256");
-    private int day = 0;
+    private int day = LocalDateTime.now().getDayOfYear()-1;
     //map die visitor aan tokens linkt
     private Map<String, List<Token>> visitortokenmap;
 
@@ -148,11 +149,21 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     public void register(Visitor visitor) throws RemoteException {
         visitors.put(visitor.getNumber(), visitor);
         visitortokenmap.put(visitor.getNumber(), new ArrayList<>());
+        sendTokenToNewVisitor(visitor);
         //TODO geef initiele tokens door
+    }
+
+    public void sendTokenToNewVisitor(Visitor visitor) throws RemoteException {
+        Random rand = new Random();
+        int r = rand.nextInt();
+        Token t = new Token(day, r);
+        visitor.setToken(day,r);
+        visitortokenmap.get(visitor.getNumber()).add(t);
     }
 
     @Override
     public void register(MatchingService matcher) throws RemoteException {
 
     }
+
 }
