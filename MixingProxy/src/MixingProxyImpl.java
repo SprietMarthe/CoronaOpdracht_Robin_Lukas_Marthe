@@ -121,6 +121,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
             // TODO check the validity of the user token
 
             // check if token is a token for that particular 𝑑𝑎𝑦𝑖
+            System.out.println(LocalDateTime.now().getDayOfYear() +"    "+c.day);
             if (LocalDateTime.now().getDayOfYear() != c.day){
                 System.out.println(LocalDateTime.now().getDayOfYear());
                 System.out.println(c.day);
