@@ -10,22 +10,19 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 class Capsule implements Serializable {
-    int random;
-    int day;
+    Token token;
     byte[] hash;
     LocalDateTime date = LocalDateTime.now();
 
-    Capsule(int random, int day, byte[] hash){
-        this.random = random;
-        this.day = day;
+    Capsule(Token token, byte[] hash){
+        this.token = token;
         this.hash = hash;
     }
 
     @Override
     public String toString() {
         return "Capsule{" +
-                "random=" + random +
-                ", day=" + day +
+                "Token=" + token +
                 ", hash=" + Arrays.toString(hash) +
                 ", date=" + date +
                 '}';
@@ -36,10 +33,12 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
     private MatchingService matcher;
     private Map<String, Visitor> visitors;
     private Queue<Capsule> queueCapsules;
+    private List<Token> spent;
 
     protected MixingProxyImpl() throws RemoteException {
         visitors = new HashMap<>();
         queueCapsules = new LinkedList<>();
+        spent = new ArrayList<>();
     }
 
     private void startMixingProxy(){
@@ -111,26 +110,31 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
 
     @Override
     public void sendCapsule(Capsule c) throws RemoteException {
-        queueCapsules.add(c);
-        checkCapsule();
-    }
-
-    private void checkCapsule() {
-        for(Capsule c : queueCapsules){
-            boolean isNotOkay = false;
-            // TODO check the validity of the user token
-
-            // check if token is a token for that particular 𝑑𝑎𝑦𝑖
-            if (LocalDateTime.now().getDayOfYear() != c.day){
-                System.out.println(LocalDateTime.now().getDayOfYear());
-                System.out.println(c.day);
-                isNotOkay = true;
-            }
-            // TODO check if token has not been spent before
-
-            System.out.println("isNotOkay: " + isNotOkay);
+        //check incoming capsule en voeg toe aan queue als goedgekeurd
+        if(checkCapsule(c)){
+            queueCapsules.add(c);
+            spent.add(c.token);
         }
 
+    }
+
+    private boolean checkCapsule(Capsule c) {
+        boolean good = true;
+
+        // TODO check the validity of the user token
+
+        // check if token is a token for that particular day
+        if(LocalDateTime.now().getDayOfYear() != c.token.getDay()){
+            System.out.println(LocalDateTime.now().getDayOfYear());
+            System.out.println(c.token.getDay());
+            good = false;
+        }
+        else if(spent.contains(c.token)){
+            good = false;
+        }
+
+        System.out.println("good: " + good);
+        return good;
     }
 
 }

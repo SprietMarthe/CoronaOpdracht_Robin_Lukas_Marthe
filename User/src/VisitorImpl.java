@@ -200,7 +200,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
 //        System.out.println("time: " + LocalDateTime.now());
 //        System.out.println("token: " + token);
 //        System.out.println("hash: " + Arrays.toString(hash));
-        Capsule c = new Capsule(token.getRandom(), token.getDay(), hash);
+        Capsule c = new Capsule(token, hash);
         mixer.sendCapsule(c);
     }
 
@@ -211,7 +211,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     public String getName() throws RemoteException {return name;}
 
     @Override
-    public void setToken(int day, int r) throws RemoteException {
-        this.token = new Token(day,r);
+    public void setToken(Token t) throws RemoteException {
+        this.token = t;
     }
 }

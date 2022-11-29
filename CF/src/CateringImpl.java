@@ -105,6 +105,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
             public void actionPerformed(ActionEvent e) {
                 try{
                     //TODO only generate QR each day
+                    //TODO eigenlijk enkel updaten als genPseudonym is opgeroepen (registrar bepaald wanneer code wordt geupdate)
                     genQRCode();
                 }catch (Exception ex){
                     ex.printStackTrace();
@@ -168,7 +169,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
     }
 
     //stuur een referentie naar onze eigen interface door naar de server zodat deze ons ook kan contacteren
-    public void register() throws RemoteException {
+    public void register() throws IOException, WriterException {
         registrar.register(this);
     }
 

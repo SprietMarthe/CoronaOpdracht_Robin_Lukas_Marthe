@@ -32,6 +32,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     private int day = LocalDateTime.now().getDayOfYear()-1;
     //map die visitor aan tokens linkt
     private Map<String, List<Token>> visitortokenmap;
+    private MatchingService matcher;
 
     protected RegistrarImpl() throws RemoteException, NoSuchAlgorithmException {
         caterers = new HashMap<>();
@@ -74,8 +75,10 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         registrar.startRegistrar();
         while(true){
             System.out.println("1: Print Caterers");
-            System.out.println("2. Print Visitors");
+            System.out.println("2: Print Visitors");
             System.out.println("3: Generate secret keys + pseudonym");
+            System.out.println("4: Generate tokens");
+            System.out.println("5: Skip to next day");
             System.out.println("Enter your choice.");
             int i = sc.nextInt();
             switch (i){
@@ -87,6 +90,12 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
                     break;
                 case 3:
                     registrar.genSecretKeysAndPseudonym();
+                    break;
+                case 4:
+                    registrar.sendTokens();
+                    break;
+                case 5:
+                    registrar.nextDay();
                     break;
             }
         }
@@ -106,16 +115,20 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     //voor elke caterer een nieuwe secret key en pseudoniem generaten
     public void genSecretKeysAndPseudonym() throws IOException, WriterException {
         for(Catering caterer : caterers.values()){
-            String CF = caterer.getCF();
-            String location = caterer.getLocation();
-            byte[] expandedAesKey = hkdf.expand(masterSecretKey, CF.getBytes(StandardCharsets.UTF_8), 16);
-            caterer.setSecretKey(expandedAesKey);
-
-            String data = location + day;
-            md.update(data.getBytes(StandardCharsets.UTF_8));
-            byte[] digest = md.digest();
-            caterer.setPseudonym(digest);
+            genSecretKeyAndPseudonym(caterer);
         }
+    }
+
+    public void genSecretKeyAndPseudonym(Catering caterer) throws IOException, WriterException {
+        String CF = caterer.getCF();
+        String location = caterer.getLocation();
+        byte[] expandedAesKey = hkdf.expand(masterSecretKey, CF.getBytes(StandardCharsets.UTF_8), 16);
+        caterer.setSecretKey(expandedAesKey);
+
+        String data = location + day;
+        md.update(data.getBytes(StandardCharsets.UTF_8));
+        byte[] digest = md.digest();
+        caterer.setPseudonym(digest);
     }
 
     //set voor elke visitor een nieuwe token en voeg deze toe aan de tokenmap
@@ -124,7 +137,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         for(Map.Entry<String, Visitor> e : visitors.entrySet()){
             int r = rand.nextInt();
             Token t = new Token(day, r);
-            e.getValue().setToken(day,r);
+            e.getValue().setToken(t);
             visitortokenmap.get(e.getKey()).add(t);
         }
     }
@@ -140,9 +153,9 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     }
 
     @Override
-    public void register(Catering caterer) throws RemoteException {
+    public void register(Catering caterer) throws IOException, WriterException {
         caterers.put(caterer.getBusinessNumber(),caterer);
-        //TODO geef initiele key en pseudoniem door
+        genSecretKeyAndPseudonym(caterer);
     }
 
     @Override
@@ -150,20 +163,18 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         visitors.put(visitor.getNumber(), visitor);
         visitortokenmap.put(visitor.getNumber(), new ArrayList<>());
         sendTokenToNewVisitor(visitor);
-        //TODO geef initiele tokens door
     }
 
     public void sendTokenToNewVisitor(Visitor visitor) throws RemoteException {
         Random rand = new Random();
         int r = rand.nextInt();
         Token t = new Token(day, r);
-        visitor.setToken(day,r);
+        visitor.setToken(t);
         visitortokenmap.get(visitor.getNumber()).add(t);
     }
 
     @Override
     public void register(MatchingService matcher) throws RemoteException {
-
+        this.matcher = matcher;
     }
-
 }
