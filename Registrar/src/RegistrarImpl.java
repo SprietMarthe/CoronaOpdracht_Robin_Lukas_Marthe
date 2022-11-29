@@ -102,13 +102,22 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     }
 
     public void printCaterers() throws RemoteException {
-        for(Catering c : caterers.values()){
-            System.out.println(c.getName());
+        if(!caterers.isEmpty()){
+            for(Catering c : caterers.values()){
+                System.out.println(c.getName());
+            }
+        }else {
+            System.out.println("No caterers");
         }
     }
     public void printVisitors() throws RemoteException {
-        for(Visitor v : visitors.values()){
-            System.out.println(v.getName());
+
+        if(!visitors.isEmpty()){
+            for(Visitor v : visitors.values()){
+                System.out.println(v.getName());
+            }
+        }else {
+            System.out.println("No visitors");
         }
     }
 
