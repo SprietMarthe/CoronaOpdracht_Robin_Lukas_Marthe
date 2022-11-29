@@ -175,7 +175,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
     public static void main(String[] args) throws RemoteException, NoSuchAlgorithmException {
 
         CateringImpl catering = new CateringImpl();
-        catering.register();
+        //catering.register();
     }
 
     private static void printMenu() throws RemoteException, NoSuchAlgorithmException {
