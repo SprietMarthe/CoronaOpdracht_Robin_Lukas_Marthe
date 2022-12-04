@@ -6,6 +6,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.InvalidKeyException;
+import java.security.SignatureException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -34,6 +36,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
     private Map<String, Visitor> visitors;
     private Queue<Capsule> queueCapsules;
     private List<Token> spent;
+    private Registrar registrar;
 
     protected MixingProxyImpl() throws RemoteException {
         visitors = new HashMap<>();
@@ -49,6 +52,9 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
                     new SslRMIServerSocketFactory());
             registry.bind("MixingProxy", this);
             System.out.println("MixingProxy bound in registry");
+
+            Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
+            registrar = (Registrar) myRegistry.lookup("Registrar");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -109,7 +115,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
     }
 
     @Override
-    public void sendCapsule(Capsule c) throws RemoteException {
+    public void sendCapsule(Capsule c) throws RemoteException, SignatureException, InvalidKeyException {
         //check incoming capsule en voeg toe aan queue als goedgekeurd
         if(checkCapsule(c)){
             queueCapsules.add(c);
@@ -118,13 +124,15 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
 
     }
 
-    private boolean checkCapsule(Capsule c) {
+    private boolean checkCapsule(Capsule c) throws RemoteException, SignatureException, InvalidKeyException {
         boolean good = true;
 
-        // TODO check the validity of the user token
-
+        //check met registrar of token valid is adhv signature
+        if(!registrar.checkTokenValidity(c.token)){
+            good = false;
+        }
         // check if token is a token for that particular day
-        if(LocalDateTime.now().getDayOfYear() != c.token.getDay()){
+        else if(LocalDateTime.now().getDayOfYear() != c.token.getDay()){
             System.out.println(LocalDateTime.now().getDayOfYear());
             System.out.println(c.token.getDay());
             good = false;
@@ -132,7 +140,6 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         else if(spent.contains(c.token)){
             good = false;
         }
-
         System.out.println("good: " + good);
         return good;
     }

@@ -9,8 +9,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -33,11 +32,21 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     //map die visitor aan tokens linkt
     private Map<String, List<Token>> visitortokenmap;
     private MatchingService matcher;
+    //signature om tokens te signen
+    private final Signature ecdsaSignature = Signature.getInstance("SHA256withRSA");
+    private final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+    private KeyPair pair;
+    private PrivateKey privateKey;
+    private PublicKey publicKey;
 
     protected RegistrarImpl() throws RemoteException, NoSuchAlgorithmException {
         caterers = new HashMap<>();
         visitors = new HashMap<>();
         visitortokenmap = new HashMap<>();
+        this.keyPairGenerator.initialize(1024);
+        this.pair = this.keyPairGenerator.generateKeyPair();
+        this.privateKey = pair.getPrivate();
+        this.publicKey = pair.getPublic();
     }
 
     private void startRegistrar() {
@@ -69,7 +78,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         return keyGenerator.generateKey();
     }
 
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, WriterException {
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, WriterException, SignatureException, InvalidKeyException {
         Scanner sc = new Scanner(System.in);
         RegistrarImpl registrar = new RegistrarImpl();
         registrar.startRegistrar();
@@ -141,11 +150,16 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     }
 
     //set voor elke visitor een nieuwe token en voeg deze toe aan de tokenmap
-    public void sendTokens() throws RemoteException {
+    public void sendTokens() throws RemoteException, SignatureException, InvalidKeyException {
         Random rand = new Random();
         for(Map.Entry<String, Visitor> e : visitors.entrySet()){
             int r = rand.nextInt();
-            Token t = new Token(day, r);
+
+            ecdsaSignature.initSign(privateKey);
+            ecdsaSignature.update((byte) r);
+            byte[] signature = ecdsaSignature.sign();
+
+            Token t = new Token(day, r, signature);
             e.getValue().setToken(t);
             visitortokenmap.get(e.getKey()).add(t);
         }
@@ -168,16 +182,19 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     }
 
     @Override
-    public void register(Visitor visitor) throws RemoteException {
+    public void register(Visitor visitor) throws RemoteException, SignatureException, InvalidKeyException {
         visitors.put(visitor.getNumber(), visitor);
         visitortokenmap.put(visitor.getNumber(), new ArrayList<>());
         sendTokenToNewVisitor(visitor);
     }
 
-    public void sendTokenToNewVisitor(Visitor visitor) throws RemoteException {
+    public void sendTokenToNewVisitor(Visitor visitor) throws RemoteException, InvalidKeyException, SignatureException {
         Random rand = new Random();
         int r = rand.nextInt();
-        Token t = new Token(day, r);
+        ecdsaSignature.initSign(privateKey);
+        ecdsaSignature.update((byte) r);
+        byte[] signature = ecdsaSignature.sign();
+        Token t = new Token(day, r, signature);
         visitor.setToken(t);
         visitortokenmap.get(visitor.getNumber()).add(t);
     }
@@ -185,5 +202,12 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     @Override
     public void register(MatchingService matcher) throws RemoteException {
         this.matcher = matcher;
+    }
+
+    @Override
+    public boolean checkTokenValidity(Token token) throws RemoteException, InvalidKeyException, SignatureException {
+        ecdsaSignature.initVerify(publicKey);
+        ecdsaSignature.update((byte) token.getRandom());
+        return ecdsaSignature.verify(token.getSignature());
     }
 }

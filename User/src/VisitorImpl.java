@@ -8,6 +8,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.InvalidKeyException;
+import java.security.SignatureException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
@@ -111,7 +113,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             public void actionPerformed(ActionEvent e){
                 try {
                     scanQRCodeFromGUI();
-                } catch (RemoteException ex) {
+                } catch (RemoteException | SignatureException | InvalidKeyException ex) {
                     ex.printStackTrace();
                 }
             }
@@ -162,7 +164,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         }
     }
 
-    public void scanQRCode() throws RemoteException {
+    public void scanQRCode() throws RemoteException, SignatureException, InvalidKeyException {
         String input;
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter input");
@@ -181,7 +183,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         }
     }
 
-    public void scanQRCodeFromGUI() throws RemoteException {
+    public void scanQRCodeFromGUI() throws RemoteException, SignatureException, InvalidKeyException {
         if(!Objects.equals(QRTextField.getText(), "")){
             int random = Integer.parseInt(QRTextField.getText().split("/")[0]);
             String CF = QRTextField.getText().split("/")[1];
@@ -196,7 +198,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         QRTextField.setText("");
     }
 
-    public void sendCapsule(byte[] hash) throws RemoteException {
+    public void sendCapsule(byte[] hash) throws RemoteException, SignatureException, InvalidKeyException {
 //        System.out.println("time: " + LocalDateTime.now());
 //        System.out.println("token: " + token);
 //        System.out.println("hash: " + Arrays.toString(hash));
