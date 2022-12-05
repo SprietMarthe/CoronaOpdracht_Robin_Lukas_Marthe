@@ -180,7 +180,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     }
 
     @Override
-    public void register(Catering caterer) throws IOException, WriterException {
+    public void register(Catering caterer) throws RemoteException, IOException, WriterException {
         caterers.put(caterer.getBusinessNumber(),caterer);
         genSecretKeyAndPseudonym(caterer);
     }

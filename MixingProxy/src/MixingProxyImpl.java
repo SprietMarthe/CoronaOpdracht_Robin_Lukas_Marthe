@@ -33,7 +33,7 @@ class Capsule implements Serializable {
 public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
     private MatchingService matcher;
     private Map<String, Visitor> visitors;
-    private Queue<Capsule> queueCapsules;
+    private List<Capsule> queueCapsules;
     private List<Token> spent;
     private Registrar registrar;
     //signature om hashes te signen
@@ -45,7 +45,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
 
     protected MixingProxyImpl() throws RemoteException, NoSuchAlgorithmException {
         visitors = new HashMap<>();
-        queueCapsules = new LinkedList<>();
+        queueCapsules = new ArrayList<>();
         spent = new ArrayList<>();
         this.keyPairGenerator.initialize(1024);
         this.pair = this.keyPairGenerator.generateKeyPair();
@@ -65,6 +65,8 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
             registrar = (Registrar) myRegistry.lookup("Registrar");
 
+            //TODO start timertask die queue flushed naar matching service
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,7 +81,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         printMenu(mixingProxy);
     }
 
-    private static void printMenu(MixingProxyImpl mixingProxy) {
+    private static void printMenu(MixingProxyImpl mixingProxy) throws RemoteException {
         Scanner s = new Scanner(System.in);
         int choice = 0;
         System.out.println("-----Mixing Proxy Options-----");
@@ -105,7 +107,9 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         s.close();
     }
 
-    private void flushQueue() {
+    private void flushQueue() throws RemoteException {
+        Collections.shuffle(queueCapsules);
+        matcher.sendCapsules(queueCapsules);
         queueCapsules.clear();
     }
 

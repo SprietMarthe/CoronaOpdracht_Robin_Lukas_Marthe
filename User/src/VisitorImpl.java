@@ -21,27 +21,32 @@ class Location {
     String CF;
     byte[] hash;
     LocalDateTime date = LocalDateTime.now();
+    Token token;
 
-    Location(int random, String CF, byte[] hash){
+    Location(int random, String CF, byte[] hash, Token token){
         this.random = random;
         this.CF = CF;
         this.hash = hash;
+        this.token = token;
     }
 }
 
 public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     Registrar registrar;
+    Practitioner practitioner;
     String number;
     String name;
     List<Token> tokens = new ArrayList<>();
     //data verkregen uit QR code
-    List<Location> logs = new ArrayList<>();
+    List<Location> locationlogs = new ArrayList<>();
     byte[] locationhash;
     MixingProxy mixer;
     //bool om logout button te tonen op ui?
     boolean onlocation = false;
     //timer om updatecapsules te sturen naar mixer eenmaal op locatie
     Timer t;
+    //lijst met uitgegeven tokens
+    List<Token> spent = new ArrayList<>();
 
     JFrame frame = new JFrame("Visitor");
     JTextField NameTextField = new JTextField();
@@ -61,6 +66,8 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
             registrar = (Registrar) myRegistry.lookup("Registrar");
             registrar.register(this);
+
+            practitioner = (Practitioner) myRegistry.lookup("Practitioner");
 
             Registry registryMixing = LocateRegistry.getRegistry("localhost", 2019,
                     new SslRMIClientSocketFactory());
@@ -171,6 +178,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     public void scanQRCode() throws RemoteException, SignatureException, InvalidKeyException {
+        //TODO niet up to date met volgende functie
         String input;
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter input");
@@ -179,13 +187,15 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             int random = Integer.parseInt(input.split("/")[0]);
             String CF = input.split("/")[1];
             locationhash = input.split("/")[2].getBytes(StandardCharsets.UTF_8);
-            Location l = new Location(random, CF, locationhash);
+            Token token = tokens.remove(0);
+            spent.add(token);
+            Location l = new Location(random, CF, locationhash, token);
             // location maar 1 keer toevoegen
-            if (!logs.contains(l)){
-                logs.add(l);
+            if (!locationlogs.contains(l)){
+                locationlogs.add(l);
             }
-            System.out.println("logs:" + logs);
-            sendCapsule(locationhash);
+            System.out.println("logs:" + locationlogs);
+            sendCapsule(locationhash, token, random, CF);
         }
     }
 
@@ -193,37 +203,45 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         if(!Objects.equals(QRTextField.getText(), "")){
             int random = Integer.parseInt(QRTextField.getText().split("/")[0]);
             String CF = QRTextField.getText().split("/")[1];
-            byte[] hash = QRTextField.getText().split("/")[2].getBytes(StandardCharsets.UTF_8);
-            Location l = new Location(random, CF, hash);
+            locationhash = QRTextField.getText().split("/")[2].getBytes(StandardCharsets.UTF_8);
+            Token token = tokens.remove(0);
+            spent.add(token);
+            Location l = new Location(random, CF, locationhash,token);
             // location maar 1 keer toevoegen
-            if (!logs.contains(l)){
-                logs.add(l);
+            if (!locationlogs.contains(l)){
+                locationlogs.add(l);
             }
-            sendCapsule(hash);
+            sendCapsule(locationhash, token, random, CF);
             onlocation = true;
         }
         QRTextField.setText("");
     }
 
-    public void sendCapsule(byte[] hash) throws RemoteException, SignatureException, InvalidKeyException {
+    public void sendCapsule(byte[] hash, Token token, int random, String CF) throws RemoteException, SignatureException, InvalidKeyException {
 //        System.out.println("time: " + LocalDateTime.now());
 //        System.out.println("token: " + token);
 //        System.out.println("hash: " + Arrays.toString(hash));
-        Capsule c = new Capsule(tokens.remove(0), hash);
+
+        //TODO capsule wordt 2x doorgestuurd nog fixen
+        Capsule c = new Capsule(token, hash);
         setSignedHash(mixer.sendCapsule(c));
         //elk halfuur nieuwe token sturen naar mixer
         t = new Timer();
-        t.scheduleAtFixedRate(new UpdateTokens(this), 0, 30*60*1000);
+        t.scheduleAtFixedRate(new UpdateTokens(this, random, CF), 0, 30*60*1000);
     }
 
-    public void sendUpdateCapsule() throws SignatureException, RemoteException, InvalidKeyException {
-        Capsule c = new Capsule(tokens.remove(0), locationhash);
+    public void sendUpdateCapsule(int random, String CF) throws SignatureException, RemoteException, InvalidKeyException {
+        Token token = tokens.remove(0);
+        Location l = new Location(random, CF, locationhash,token);
+        locationlogs.add(l);
+        Capsule c = new Capsule(token, locationhash);
         mixer.sendCapsule(c);
     }
 
     //TODO deze funtie callen vanuit een logout button op ui
     //TODO log exit time
     public void leaveLocation(){
+        onlocation = false;
         System.out.println("left location");
         t.cancel();
     }
