@@ -153,15 +153,19 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     public void sendTokens() throws RemoteException, SignatureException, InvalidKeyException {
         Random rand = new Random();
         for(Map.Entry<String, Visitor> e : visitors.entrySet()){
-            int r = rand.nextInt();
+            List<Token> tokens = new ArrayList<>();
+            for(int i = 0; i < 48; i++){
+                int r = rand.nextInt();
 
-            ecdsaSignature.initSign(privateKey);
-            ecdsaSignature.update((byte) r);
-            byte[] signature = ecdsaSignature.sign();
+                ecdsaSignature.initSign(privateKey);
+                ecdsaSignature.update((byte) r);
+                byte[] signature = ecdsaSignature.sign();
 
-            Token t = new Token(day, r, signature);
-            e.getValue().setToken(t);
-            visitortokenmap.get(e.getKey()).add(t);
+                Token t = new Token(day, r, signature);
+                tokens.add(t);
+                visitortokenmap.get(e.getKey()).add(t);
+            }
+            e.getValue().setTokens(tokens);
         }
     }
 
@@ -190,13 +194,19 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
 
     public void sendTokenToNewVisitor(Visitor visitor) throws RemoteException, InvalidKeyException, SignatureException {
         Random rand = new Random();
-        int r = rand.nextInt();
-        ecdsaSignature.initSign(privateKey);
-        ecdsaSignature.update((byte) r);
-        byte[] signature = ecdsaSignature.sign();
-        Token t = new Token(day, r, signature);
-        visitor.setToken(t);
-        visitortokenmap.get(visitor.getNumber()).add(t);
+        List<Token> tokens = new ArrayList<>();
+        for(int i = 0; i < 48; i++){
+            int r = rand.nextInt();
+
+            ecdsaSignature.initSign(privateKey);
+            ecdsaSignature.update((byte) r);
+            byte[] signature = ecdsaSignature.sign();
+
+            Token t = new Token(day, r, signature);
+            tokens.add(t);
+            visitortokenmap.get(visitor.getNumber()).add(t);
+        }
+        visitor.setTokens(tokens);
     }
 
     @Override

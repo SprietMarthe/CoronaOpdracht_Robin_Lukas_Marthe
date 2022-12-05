@@ -32,7 +32,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     Registrar registrar;
     String number;
     String name;
-    Token token;
+    List<Token> tokens = new ArrayList<>();
     //data verkregen uit QR code
     List<Location> logs = new ArrayList<>();
     MixingProxy mixer;
@@ -196,13 +196,14 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             sendCapsule(hash);
         }
         QRTextField.setText("");
+        //TODO stuur nieuwe capsule elk halfuur tot men uitlogd van locatie
     }
 
     public void sendCapsule(byte[] hash) throws RemoteException, SignatureException, InvalidKeyException {
 //        System.out.println("time: " + LocalDateTime.now());
 //        System.out.println("token: " + token);
 //        System.out.println("hash: " + Arrays.toString(hash));
-        Capsule c = new Capsule(token, hash);
+        Capsule c = new Capsule(tokens.remove(0), hash);
         setSignedHash(mixer.sendCapsule(c));
     }
 
@@ -213,8 +214,8 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     public String getName() throws RemoteException {return name;}
 
     @Override
-    public void setToken(Token t) throws RemoteException {
-        this.token = t;
+    public void setTokens(List<Token> t) throws RemoteException {
+        this.tokens = t;
     }
 
     @Override
