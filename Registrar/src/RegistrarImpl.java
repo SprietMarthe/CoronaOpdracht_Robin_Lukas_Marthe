@@ -60,8 +60,8 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }
-            //stuur nieuwe tokens naar visitors elk halfuur
-            new Timer().scheduleAtFixedRate(new SendToken(this), 0, 30*60*1000);
+            //stuur nieuwe tokens naar visitors elke dag
+            new Timer().scheduleAtFixedRate(new SendToken(this), 0, 24*60*60*1000);
             //stuur nieuwe key en pseudoniem naar caterers elke dag
             new Timer().scheduleAtFixedRate(new GenKeyAndPseudonym(this), 0, 24*60*60*1000);
         }
