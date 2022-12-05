@@ -219,7 +219,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
                 new String(data.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8),
                 BarcodeFormat.QR_CODE, 200, 200);
 
-        String path = "code" + businessNumber;
+        String path = "code" + businessNumber;              //TODO tonen in gui
         path += ".png";
         MatrixToImageWriter.writeToFile(
                 matrix,

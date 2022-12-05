@@ -8,9 +8,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 
 public interface Registrar extends Remote {
-    public String helloTo(String name) throws RemoteException, NoSuchAlgorithmException;
-    public void register(Catering caterer) throws IOException, WriterException;
-    public void register(Visitor visitor) throws RemoteException, SignatureException, InvalidKeyException;
-    public void register(MatchingService matcher) throws RemoteException;
-    public boolean checkTokenValidity(Token token) throws RemoteException, InvalidKeyException, SignatureException;
+    String helloTo(String name) throws RemoteException, NoSuchAlgorithmException;
+    void register(Catering caterer) throws IOException, WriterException;
+    void register(Visitor visitor) throws RemoteException, SignatureException, InvalidKeyException;
+    void register(MatchingService matcher) throws RemoteException;
+    boolean checkTokenValidity(Token token) throws RemoteException, InvalidKeyException, SignatureException;
+
+    int getDay() throws RemoteException;
 }

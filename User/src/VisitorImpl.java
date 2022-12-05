@@ -1,8 +1,12 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -49,14 +53,19 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     List<Token> spent = new ArrayList<>();
 
     JFrame frame = new JFrame("Visitor");
-    JTextField NameTextField = new JTextField();
-    JTextField PhoneTextField = new JTextField();
-    JTextField QRTextField = new JTextField();
+    JPanel panel = new JPanel();
+    JPanel panel2 = new JPanel();
+    JTextField NameTextField = new JTextField(30);
+    JTextField PhoneTextField = new JTextField(30);
+    JTextField QRTextField = new JTextField(30);
     JButton logInButton = new JButton("Log in");
     JButton scanQRCodeButton = new JButton("Scan QR code");
+    JButton logOutButton = new JButton("Log out");
     JLabel PhoneLabel = new JLabel("Unique phone number");
     JLabel NameLabel = new JLabel("Name");
+    JLabel IntroLabel = new JLabel("Welkom new visitor");
     JLabel QRLabel = new JLabel("QR code");
+    JLabel ImageLabel = new JLabel();
 
     public VisitorImpl() throws RemoteException {
         setFrame();
@@ -83,30 +92,22 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
 
     private void setFrame() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setBounds(0,0,600,400);
+        frame.setPreferredSize(new Dimension(300, 500));
+        frame.setLayout(new BorderLayout());
 
-        NameLabel.setBounds(0,0, 10, 10);
-        PhoneLabel.setBounds(50,100, 10, 10);
-        NameTextField.setVisible(true);
-        PhoneTextField.setVisible(true);
-        QRLabel.setVisible(false);
-        QRTextField.setVisible(false);
-        frame.getContentPane().add(NameLabel);
-        frame.getContentPane().add(NameTextField);
-        frame.getContentPane().add(PhoneLabel);
-        frame.getContentPane().add(PhoneTextField);
-        frame.getContentPane().add(logInButton);
-        frame.getContentPane().add(QRLabel);
-        frame.getContentPane().add(QRTextField);
-        frame.getContentPane().add(scanQRCodeButton);
-
-
-        frame.setLayout(new GridLayout(4,2));
+        IntroLabel.setVisible(true);
+        frame.getContentPane().add(IntroLabel, BorderLayout.PAGE_START);
+        panel.setLayout(new GridLayout(2,2));
+        panel.add(NameLabel);
+        panel.add(NameTextField);
+        panel.add(PhoneLabel);
+        panel.add(PhoneTextField);
+        frame.add(panel);
         frame.setSize(600,400);
-        scanQRCodeButton.setVisible(false);
         NameTextField.setEditable(true);
-        scanQRCodeButton.setVisible(false);
         PhoneTextField.setEditable(true);
+        frame.getContentPane().add(logInButton, BorderLayout.PAGE_END);
+
         frame.pack();
         frame.setLocationRelativeTo(null); // center
 
@@ -126,19 +127,36 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             public void actionPerformed(ActionEvent e){
                 try {
                     scanQRCodeFromGUI();
+                    BufferedImage myPicture = ImageIO.read(new File("code1.png"));
+                    JLabel picLabel = new JLabel(new ImageIcon(myPicture));
+                    picLabel.setBounds(0,0, 30, 30);
+                    frame.getContentPane().add(picLabel);
                 } catch (RemoteException | SignatureException | InvalidKeyException ex) {
                     ex.printStackTrace();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                 }
+            }
+        });
+        logOutButton.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                QRLabel.setVisible(false);
+                QRTextField.setVisible(false);
+                logOutButton.setVisible(false);
+                scanQRCodeButton.setVisible(false);
+                ImageLabel.setText("Close window");
+                leaveLocation();
             }
         });
 
     }
 
+
     public static void main(String[] args) throws RemoteException {
         System.setProperty("javax.net.ssl.trustStore","truststore");
         System.setProperty("javax.net.ssl.trustStorePassword","trustword");
 
-        Scanner sc = new Scanner(System.in);
+//        Scanner sc = new Scanner(System.in);
         VisitorImpl visitor = new VisitorImpl();
         visitor.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         visitor.frame.setVisible(true);
@@ -162,22 +180,40 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
 
     private void tryLogIn() throws RemoteException {
         if(!Objects.equals(NameTextField, "") && !Objects.equals(PhoneTextField, "")){
-//            System.out.println("name:" + NameTextField.getText());
-//            System.out.println("phone:" + PhoneTextField.getText());
             this.name = NameTextField.getText();
             this.number = PhoneTextField.getText();
-            frame.remove(PhoneTextField);
-            frame.remove(PhoneLabel);
+            panel.remove(NameLabel);
+            panel.remove(NameTextField);
+            panel.remove(PhoneTextField);
+            panel.remove(PhoneLabel);
             frame.remove(NameLabel);
             frame.remove(NameTextField);
+            frame.remove(PhoneTextField);
+            frame.remove(PhoneLabel);
             frame.remove(logInButton);
-            QRLabel.setVisible(true);
-            QRTextField.setVisible(true);
-            scanQRCodeButton.setVisible(true);
+            frame.pack();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+            panel.add(QRLabel);
+            JPanel p = new JPanel();
+            p.setPreferredSize(new Dimension(300,30));
+            p.setMaximumSize(new Dimension(300,30));
+            p.add(QRTextField);
+            panel.add(p);
+            JPanel p2 = new JPanel();
+            p2.setPreferredSize(new Dimension(300,300));
+            p2.setMaximumSize(new Dimension(300,300));
+            p2.add(ImageLabel);
+            ImageLabel.setText("Hier komt bewijs!");
+            panel.add(p2);
+            panel2.setLayout(new GridLayout(2,1));
+            panel2.add(scanQRCodeButton);
+            panel2.add(logOutButton);
+            frame.add(panel2, BorderLayout.PAGE_END);
+            frame.pack();
         }
     }
 
-    public void scanQRCode() throws RemoteException, SignatureException, InvalidKeyException {
+    public void scanQRCode() throws IOException, SignatureException, InvalidKeyException {
         //TODO niet up to date met volgende functie
         String input;
         Scanner sc = new Scanner(System.in);
@@ -199,7 +235,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         }
     }
 
-    public void scanQRCodeFromGUI() throws RemoteException, SignatureException, InvalidKeyException {
+    public void scanQRCodeFromGUI() throws IOException, SignatureException, InvalidKeyException {
         if(!Objects.equals(QRTextField.getText(), "")){
             int random = Integer.parseInt(QRTextField.getText().split("/")[0]);
             String CF = QRTextField.getText().split("/")[1];
@@ -217,7 +253,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         QRTextField.setText("");
     }
 
-    public void sendCapsule(byte[] hash, Token token, int random, String CF) throws RemoteException, SignatureException, InvalidKeyException {
+    public void sendCapsule(byte[] hash, Token token, int random, String CF) throws IOException, SignatureException, InvalidKeyException {
 //        System.out.println("time: " + LocalDateTime.now());
 //        System.out.println("token: " + token);
 //        System.out.println("hash: " + Arrays.toString(hash));
@@ -258,7 +294,9 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     @Override
-    public void setSignedHash(byte[] signedHash) throws RemoteException {
-        IdenticonGenerator.saveImage(IdenticonGenerator.generateIdenticons(Arrays.toString(signedHash), 500,500),"identicon");
+    public void setSignedHash(byte[] signedHash) throws IOException {
+        IdenticonGenerator.saveImage(IdenticonGenerator.generateIdenticons(Arrays.toString(signedHash), 200,200),"identicon");
+        ImageLabel.setIcon(new ImageIcon("identicon.png"));
+        ImageLabel.setText("");
     }
 }

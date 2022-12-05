@@ -220,4 +220,9 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         ecdsaSignature.update((byte) token.getRandom());
         return ecdsaSignature.verify(token.getSignature());
     }
+
+    @Override
+    public int getDay() throws RemoteException {
+        return day;
+    }
 }
