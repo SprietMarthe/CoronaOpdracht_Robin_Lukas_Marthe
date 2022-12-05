@@ -222,6 +222,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     //TODO deze funtie callen vanuit een logout button op ui
+    //TODO log exit time
     public void leaveLocation(){
         System.out.println("left location");
         t.cancel();
