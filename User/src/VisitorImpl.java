@@ -203,7 +203,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
 //        System.out.println("token: " + token);
 //        System.out.println("hash: " + Arrays.toString(hash));
         Capsule c = new Capsule(token, hash);
-        mixer.sendCapsule(c);
+        setSignedHash(mixer.sendCapsule(c));
     }
 
     @Override
@@ -215,5 +215,10 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     @Override
     public void setToken(Token t) throws RemoteException {
         this.token = t;
+    }
+
+    @Override
+    public void setSignedHash(byte[] signedHash) throws RemoteException {
+        IdenticonGenerator.saveImage(IdenticonGenerator.generateIdenticons(Arrays.toString(signedHash), 500,500),"identicon");
     }
 }

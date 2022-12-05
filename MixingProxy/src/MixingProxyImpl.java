@@ -6,8 +6,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.security.InvalidKeyException;
-import java.security.SignatureException;
+import java.security.*;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -37,11 +36,21 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
     private Queue<Capsule> queueCapsules;
     private List<Token> spent;
     private Registrar registrar;
+    //signature om hashes te signen
+    private final Signature ecdsaSignature = Signature.getInstance("SHA256withRSA");
+    private final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+    private KeyPair pair;
+    private PrivateKey privateKey;
+    private PublicKey publicKey;
 
-    protected MixingProxyImpl() throws RemoteException {
+    protected MixingProxyImpl() throws RemoteException, NoSuchAlgorithmException {
         visitors = new HashMap<>();
         queueCapsules = new LinkedList<>();
         spent = new ArrayList<>();
+        this.keyPairGenerator.initialize(1024);
+        this.pair = this.keyPairGenerator.generateKeyPair();
+        this.privateKey = pair.getPrivate();
+        this.publicKey = pair.getPublic();
     }
 
     private void startMixingProxy(){
@@ -61,8 +70,8 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        //http://docs.oracle.com/javase/1.5.0/docs/guide/security/jsse/JSSERefGuide.html#CreateKeystore gevolgde tutorial
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
+        //settings voor ssl connection
         System.setProperty("javax.net.ssl.keyStore","keystore");
         System.setProperty("javax.net.ssl.keyStorePassword","password");
         MixingProxyImpl mixingProxy = new MixingProxyImpl();
@@ -115,13 +124,14 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
     }
 
     @Override
-    public void sendCapsule(Capsule c) throws RemoteException, SignatureException, InvalidKeyException {
+    public byte[] sendCapsule(Capsule c) throws RemoteException, SignatureException, InvalidKeyException {
         //check incoming capsule en voeg toe aan queue als goedgekeurd
         if(checkCapsule(c)){
             queueCapsules.add(c);
             spent.add(c.token);
+            return signHash(c.hash);
         }
-
+        return new byte[0];
     }
 
     private boolean checkCapsule(Capsule c) throws RemoteException, SignatureException, InvalidKeyException {
@@ -142,6 +152,12 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         }
         System.out.println("good: " + good);
         return good;
+    }
+
+    private byte[] signHash(byte[] hash) throws InvalidKeyException, SignatureException {
+        ecdsaSignature.initSign(privateKey);
+        ecdsaSignature.update(hash);
+        return ecdsaSignature.sign();
     }
 
 }
