@@ -14,26 +14,9 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
-
-//klasse om gescande QR code te loggen
-class Location {
-    int random;
-    String CF;
-    byte[] hash;
-    LocalDateTime date = LocalDateTime.now();
-    Token token;
-
-    Location(int random, String CF, byte[] hash, Token token){
-        this.random = random;
-        this.CF = CF;
-        this.hash = hash;
-        this.token = token;
-    }
-}
 
 public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     Registrar registrar;
@@ -60,6 +43,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     JTextField QRTextField = new JTextField(30);
     JButton logInButton = new JButton("Log in");
     JButton scanQRCodeButton = new JButton("Scan QR code");
+    JButton releaseLogs = new JButton("Release Logs to Practioner");
     JButton logOutButton = new JButton("Log out");
     JLabel PhoneLabel = new JLabel("Unique phone number");
     JLabel NameLabel = new JLabel("Name");
@@ -131,9 +115,16 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
                     JLabel picLabel = new JLabel(new ImageIcon(myPicture));
                     picLabel.setBounds(0,0, 30, 30);
                     frame.getContentPane().add(picLabel);
-                } catch (RemoteException | SignatureException | InvalidKeyException ex) {
+                } catch (SignatureException | InvalidKeyException | IOException ex) {
                     ex.printStackTrace();
-                } catch (IOException ex) {
+                }
+            }
+        });
+        releaseLogs.addActionListener(new ActionListener(){    //add an event and take action
+            public void actionPerformed(ActionEvent e){
+                try {
+                    releaseLogs(locationlogs);
+                } catch (IOException | SignatureException | InvalidKeyException ex) {
                     ex.printStackTrace();
                 }
             }
@@ -207,6 +198,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             panel.add(p2);
             panel2.setLayout(new GridLayout(2,1));
             panel2.add(scanQRCodeButton);
+            panel2.add(releaseLogs);
             panel2.add(logOutButton);
             frame.add(panel2, BorderLayout.PAGE_END);
             frame.pack();
@@ -274,6 +266,10 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         mixer.sendCapsule(c);
     }
 
+    public void releaseLogs(List<Location> locationlogs) throws IOException, SignatureException, InvalidKeyException {
+        practitioner.getLogs(locationlogs);
+    }
+
     //TODO deze funtie callen vanuit een logout button op ui
     //TODO log exit time
     public void leaveLocation(){
@@ -299,4 +295,5 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         ImageLabel.setIcon(new ImageIcon("identicon.png"));
         ImageLabel.setText("");
     }
+
 }

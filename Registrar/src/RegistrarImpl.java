@@ -24,6 +24,8 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     private Map<Integer, Catering> caterers;
     //map met alle geregistreerde visitors met key hun telefoonnummer
     private Map<String, Visitor> visitors;
+    //map met pseudoniemen met dag als key
+    private Map<Integer, byte[]> pseudonyms;
     //key derivation functie om secretkey te genereren
     private final HKDF hkdf = HKDF.fromHmacSha256();
     //hashing functie om pseudoniem te genereren
@@ -43,6 +45,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         caterers = new HashMap<>();
         visitors = new HashMap<>();
         visitortokenmap = new HashMap<>();
+        pseudonyms = new HashMap<>();
         this.keyPairGenerator.initialize(1024);
         this.pair = this.keyPairGenerator.generateKeyPair();
         this.privateKey = pair.getPrivate();
@@ -147,6 +150,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         md.update(data.getBytes(StandardCharsets.UTF_8));
         byte[] digest = md.digest();
         caterer.setPseudonym(digest);
+        pseudonyms.put(day, digest);
     }
 
     //set voor elke visitor een nieuwe token en voeg deze toe aan de tokenmap
@@ -222,7 +226,8 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     }
 
     @Override
-    public int getDay() throws RemoteException {
-        return day;
+    public byte[] downloadPseudonyms(int date) {
+        return pseudonyms.get(date);
     }
+
 }

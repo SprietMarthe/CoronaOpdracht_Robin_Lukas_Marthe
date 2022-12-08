@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="MatchingService" />
+    <orderEntry type="module" module-name="User" />
   </component>
 </module>

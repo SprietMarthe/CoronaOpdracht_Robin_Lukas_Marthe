@@ -4,8 +4,9 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 public interface Visitor extends Remote {
-    public String getNumber() throws RemoteException;
-    public String getName() throws RemoteException;
-    public void setTokens(List<Token> t) throws RemoteException;
-    public void setSignedHash(byte[] signedHash) throws IOException;
+    String getNumber() throws RemoteException;
+    String getName() throws RemoteException;
+    void setTokens(List<Token> t) throws RemoteException;
+    void setSignedHash(byte[] signedHash) throws IOException;
+
 }
