@@ -1,11 +1,25 @@
 import java.io.IOException;
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.*;
+import java.util.ArrayList;
 import java.util.List;
 
+class Tuple implements Serializable {
+    Location l;
+    byte[] pracSignature;
+
+    Tuple(Location l, byte[] pracsig){
+        this.l = l;
+        this.pracSignature = pracsig;
+    }
+    Location getLocation(){
+        return l;
+    }
+}
 
 public class PractitionerImpl extends UnicastRemoteObject implements Practitioner {
     MatchingService matcher;
@@ -34,7 +48,7 @@ public class PractitionerImpl extends UnicastRemoteObject implements Practitione
         PractitionerImpl practitioner = new PractitionerImpl();
     }
 
-    private byte[] signHash(byte[] hash) throws InvalidKeyException, SignatureException {
+    private byte[] signLocation(byte[] hash) throws InvalidKeyException, SignatureException {
         ecdsaSignature.initSign(privateKey);
         ecdsaSignature.update(hash);
         return ecdsaSignature.sign();
@@ -45,14 +59,14 @@ public class PractitionerImpl extends UnicastRemoteObject implements Practitione
         this.matcher = matchingService;
     }
 
+    //maak tuples met log data en signature van practitioner voor matching server
     @Override
     public void getLogs(List<Location> locationlogs) throws SignatureException, InvalidKeyException, RemoteException {
+        List<Tuple> tuples = new ArrayList<>();
         for (Location l : locationlogs) {
-            signHash(l.hash);
+            tuples.add(new Tuple(l,signLocation(l.hash)));
         }
         // TODO shuffeling with tupples from other users
-        matcher.getLogs(locationlogs);
+        matcher.getTuples(tuples);
     }
-
-
 }

@@ -111,10 +111,6 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             public void actionPerformed(ActionEvent e){
                 try {
                     scanQRCodeFromGUI();
-                    BufferedImage myPicture = ImageIO.read(new File("code1.png"));
-                    JLabel picLabel = new JLabel(new ImageIcon(myPicture));
-                    picLabel.setBounds(0,0, 30, 30);
-                    frame.getContentPane().add(picLabel);
                 } catch (SignatureException | InvalidKeyException | IOException ex) {
                     ex.printStackTrace();
                 }
@@ -229,9 +225,9 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
 
     public void scanQRCodeFromGUI() throws IOException, SignatureException, InvalidKeyException {
         if(!Objects.equals(QRTextField.getText(), "")){
-            int random = Integer.parseInt(QRTextField.getText().split("/")[0]);
-            String CF = QRTextField.getText().split("/")[1];
-            locationhash = QRTextField.getText().split("/")[2].getBytes(StandardCharsets.UTF_8);
+            int random = Integer.parseInt(QRTextField.getText().split("\\|")[0]);
+            String CF = QRTextField.getText().split("\\|")[1];
+            locationhash = Base64.getDecoder().decode(QRTextField.getText().split("\\|")[2]);
             Token token = tokens.remove(0);
             spent.add(token);
             Location l = new Location(random, CF, locationhash,token);
@@ -250,12 +246,11 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
 //        System.out.println("token: " + token);
 //        System.out.println("hash: " + Arrays.toString(hash));
 
-        //TODO capsule wordt 2x doorgestuurd nog fixen
         Capsule c = new Capsule(token, hash);
         setSignedHash(mixer.sendCapsule(c));
         //elk halfuur nieuwe token sturen naar mixer
         t = new Timer();
-        t.scheduleAtFixedRate(new UpdateTokens(this, random, CF), 0, 30*60*1000);
+        t.scheduleAtFixedRate(new UpdateTokens(this, random, CF),30*60*1000, 30*60*1000);
     }
 
     public void sendUpdateCapsule(int random, String CF) throws SignatureException, RemoteException, InvalidKeyException {
@@ -270,8 +265,6 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         practitioner.getLogs(locationlogs);
     }
 
-    //TODO deze funtie callen vanuit een logout button op ui
-    //TODO log exit time
     public void leaveLocation(){
         onlocation = false;
         System.out.println("left location");

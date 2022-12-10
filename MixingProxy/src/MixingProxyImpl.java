@@ -19,15 +19,14 @@ class Capsule implements Serializable {
         this.token = token;
         this.hash = hash;
     }
-
-    @Override
-    public String toString() {
-        return "Capsule{" +
-                "Token=" + token +
-                ", hash=" + Arrays.toString(hash) +
-                ", date=" + date +
-                '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "Capsule{" +
+//                "Token=" + token +
+//                ", hash=" + Arrays.toString(hash) +
+//                ", date=" + date +
+//                '}';
+//    }
 }
 
 public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{

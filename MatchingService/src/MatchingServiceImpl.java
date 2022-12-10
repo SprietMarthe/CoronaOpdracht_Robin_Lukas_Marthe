@@ -10,7 +10,9 @@ import java.rmi.server.UnicastRemoteObject;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class MatchingServiceImpl extends UnicastRemoteObject implements MatchingService {
     MixingProxy mixer;
@@ -18,6 +20,7 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
     Practitioner practitioner;
     List<Capsule> capsules = new ArrayList<>();
     private final HKDF hkdf = HKDF.fromHmacSha256();
+    //om zelfde waarde als catering te hashen uit Ri en nym
     private final MessageDigest md = MessageDigest.getInstance("SHA-256");
 
     protected MatchingServiceImpl() throws RemoteException, NoSuchAlgorithmException {
@@ -59,19 +62,33 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
     }
 
     @Override
-    public void getLogs(List<Location> locationlogs) throws RemoteException {
-        List<byte[]> pseudonyms = new ArrayList<>();
-        for (Location l : locationlogs) {
-            byte[] pseudonym = registrar.downloadPseudonyms(l.date.getDayOfYear());
-            pseudonyms.add(pseudonym);
+    //krijg tuples van practitioner, zoek betreffende caterer op via registrar mbh CF in tuple, hash R uit tuple en nym die bij CF hoort,
+    // check of deze hash overeen komt met hash die visitor al had
+    public void getTuples(List<Tuple> tuples) throws RemoteException {
+        //TODO check of er geen null waarden worden gegeven uit de map (kan als info van visitor vals is)
+        for(Tuple t : tuples){
+            Map<String, byte[]> pseudonyms = registrar.downloadPseudonyms(t.getLocation().date.getDayOfYear());
+            String tbhash = t.getLocation().random + Arrays.toString(pseudonyms.get(t.getLocation().CF));
+            md.update(tbhash.getBytes(StandardCharsets.UTF_8));
+            byte[] digest = md.digest();
+
+            if(Arrays.equals(digest, t.getLocation().hash)){
+                System.out.println("hash klopt, correcte informatie verschaft door visitor");
+                markCapsules(t);
+            }
+            else{
+                System.out.println("hash incorrect!");
+                System.out.println("random tuple: " + t.getLocation().random);
+                System.out.println("nym registrar: " + pseudonyms.get(t.getLocation().CF));
+                System.out.println("CF tuple: " + t.getLocation().CF);
+                System.out.println(digest);
+                System.out.println(t.getLocation().hash);
+            }
         }
-        checkValidity(pseudonyms, locationlogs);
     }
 
-    private void checkValidity(List<byte[]> pseudonyms, List<Location> locationlogs) {
-        // TODO hash of random and CF (van registrar)
-        for (Location l : locationlogs) {
-//            byte[] hashRandomAndCF = hkdf.expand(l.random.getBytes(StandardCharsets.UTF_8), l.CF.getBytes(StandardCharsets.UTF_8), 16);
-        }
+    public void markCapsules(Tuple t){
+
     }
+
 }

@@ -20,12 +20,12 @@ de registrar maakt één master key aan die het dan telkens gebruikt voor die an
 
 public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     private SecretKey masterSecretKey;
-    //map met alle geregistreerde caterers met key hun bedrijfsnummer
-    private Map<Integer, Catering> caterers;
+    //map met alle geregistreerde caterers met key hun CF
+    private Map<String, Catering> caterers;
     //map met alle geregistreerde visitors met key hun telefoonnummer
     private Map<String, Visitor> visitors;
-    //map met pseudoniemen met dag als key
-    private Map<Integer, byte[]> pseudonyms;
+    //map met pseudoniemen met CF als key in map met dag als key
+    private Map<Integer, Map<String, byte[]>> pseudonyms;
     //key derivation functie om secretkey te genereren
     private final HKDF hkdf = HKDF.fromHmacSha256();
     //hashing functie om pseudoniem te genereren
@@ -142,15 +142,23 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
 
     public void genSecretKeyAndPseudonym(Catering caterer) throws IOException, WriterException {
         String CF = caterer.getCF();
-        String location = caterer.getLocation();
         byte[] expandedAesKey = hkdf.expand(masterSecretKey, CF.getBytes(StandardCharsets.UTF_8), 16);
         caterer.setSecretKey(expandedAesKey);
 
-        String data = location + day;
+        String data = CF + day;
         md.update(data.getBytes(StandardCharsets.UTF_8));
         byte[] digest = md.digest();
         caterer.setPseudonym(digest);
-        pseudonyms.put(day, digest);
+
+        //caterer.setPseudonym(Base64.getEncoder().encodeToString(digest));
+        //System.out.println("nym encoded: " + Base64.getEncoder().encodeToString(digest));
+
+        Map<String, byte[]> catererpseudonymmap = new HashMap<>();
+        catererpseudonymmap.put(CF,digest);
+        //System.out.println(CF + " " + Base64.getEncoder().encodeToString(digest));
+        System.out.println(digest);
+        //System.out.println(Base64.getDecoder().decode(Base64.getEncoder().encodeToString(digest)));
+        pseudonyms.put(day,  catererpseudonymmap);
     }
 
     //set voor elke visitor een nieuwe token en voeg deze toe aan de tokenmap
@@ -185,7 +193,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
 
     @Override
     public void register(Catering caterer) throws RemoteException, IOException, WriterException {
-        caterers.put(caterer.getBusinessNumber(),caterer);
+        caterers.put(caterer.getCF(),caterer);
         genSecretKeyAndPseudonym(caterer);
     }
 
@@ -226,7 +234,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     }
 
     @Override
-    public byte[] downloadPseudonyms(int date) {
+    public Map<String, byte[]> downloadPseudonyms(int date) {
         return pseudonyms.get(date);
     }
 
