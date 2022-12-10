@@ -118,6 +118,12 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
                 System.out.println("capsule gemarked");
             }
         }
+        if(criticalCaps.get(LocalDateTime.now().getDayOfYear()) != null){
+            newcriticalcaps.addAll(criticalCaps.get(LocalDateTime.now().getDayOfYear()));
+        }
+        if(criticalTokens.get(LocalDateTime.now().getDayOfYear()) != null){
+            newcriticaltokens.addAll(criticalTokens.get(LocalDateTime.now().getDayOfYear()));
+        }
         criticalCaps.put(LocalDateTime.now().getDayOfYear(), newcriticalcaps);
         criticalTokens.put(LocalDateTime.now().getDayOfYear(), newcriticaltokens);
     }
