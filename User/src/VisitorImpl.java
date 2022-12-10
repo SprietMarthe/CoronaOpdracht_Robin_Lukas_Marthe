@@ -280,6 +280,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
                 if(Arrays.equals(c.hash, l.hash) && overlap(c.date, l.date)){
                     System.out.println("Persoon loopt risico!");
                     mixer.forwardConfirmedToken(l.token);
+                    break;
                 }
             }
         }
