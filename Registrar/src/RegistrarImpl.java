@@ -71,7 +71,6 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     }
     private void setFrame(){
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setBounds(0,0,1000,400);
         visitorList.setVisible(true);
         catererList.setVisible(true);
         catererLabel.setVisible(true);
@@ -87,11 +86,9 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         frame.getContentPane().add(nextDay);
 
         frame.setLayout(new GridLayout(4,2));
-        frame.setSize(1000,400);
-        frame.pack();
+        frame.setSize(700,250);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-        frame.pack();
 
         dayText.setText(Integer.toString(day));
         genKeys.addActionListener(new ActionListener() {

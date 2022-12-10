@@ -1,5 +1,9 @@
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.Serializable;
 import java.rmi.RemoteException;
@@ -9,6 +13,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.security.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 
 class Capsule implements Serializable {
     Token token;
@@ -19,14 +24,14 @@ class Capsule implements Serializable {
         this.token = token;
         this.hash = hash;
     }
-//    @Override
-//    public String toString() {
-//        return "Capsule{" +
-//                "Token=" + token +
-//                ", hash=" + Arrays.toString(hash) +
-//                ", date=" + date +
-//                '}';
-//    }
+   @Override
+    public String toString() {
+        return "Capsule{" +
+               "Token=" + token +
+                ", hash=" + Arrays.toString(hash) +
+                ", date=" + date +
+                '}';
+    }
 }
 
 public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
@@ -42,6 +47,11 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
     private PrivateKey privateKey;
     private PublicKey publicKey;
 
+    JFrame frame = new JFrame("Mixing Proxy");
+    JLabel capsulesLabel = new JLabel("Capsules: ");
+    JList capsulesList = new JList();
+    JButton flushQueue = new JButton("flush queue");
+    DefaultListModel capsules = new DefaultListModel();
     protected MixingProxyImpl() throws RemoteException, NoSuchAlgorithmException {
         visitors = new HashMap<>();
         queueCapsules = new ArrayList<>();
@@ -54,6 +64,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
 
     private void startMixingProxy(){
         try {
+            setFrame();
             // Create SSL-based registry
             Registry registry = LocateRegistry.createRegistry(2019,
                     new SslRMIClientSocketFactory(),
@@ -70,7 +81,29 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
             e.printStackTrace();
         }
     }
+    public void setFrame(){
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        capsulesLabel.setVisible(true);
+        capsulesList.setVisible(true);
+        flushQueue.setVisible(true);
+        frame.getContentPane().add(capsulesLabel);
+        frame.getContentPane().add(capsulesList);
+        frame.getContentPane().add(flushQueue);
+        frame.setLayout(new GridLayout(5,2));
+        frame.setSize(500,200);
+        frame.setVisible(true);
 
+        flushQueue.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try{
+                    flushQueue();
+                }catch(Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
         //settings voor ssl connection
         System.setProperty("javax.net.ssl.keyStore","keystore");
@@ -110,6 +143,8 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         Collections.shuffle(queueCapsules);
         matcher.sendCapsules(queueCapsules);
         queueCapsules.clear();
+        capsules.clear();
+        capsulesList.clearSelection();
     }
 
     private void printQueue() {
@@ -131,6 +166,10 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         //check incoming capsule en voeg toe aan queue als goedgekeurd
         if(checkCapsule(c)){
             queueCapsules.add(c);
+            capsules.addElement("Capsule "+c.toString());
+            capsules.addElement("    Token "+c.token.toString());
+            capsulesList.setModel(capsules);
+            frame.pack();
             spent.add(c.token);
             return signHash(c.hash);
         }
