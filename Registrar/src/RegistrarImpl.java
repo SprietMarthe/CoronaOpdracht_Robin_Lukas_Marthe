@@ -3,6 +3,10 @@ import com.google.zxing.WriterException;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
@@ -12,6 +16,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.security.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
+import java.util.Timer;
 
 /*
 de registrar maakt één master key aan die het dan telkens gebruikt voor die andere keys per barowner te maken
@@ -40,8 +46,20 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     private KeyPair pair;
     private PrivateKey privateKey;
     private PublicKey publicKey;
+    JFrame frame = new JFrame("Registrar");
+    JLabel catererLabel = new JLabel("Caterers: ");
+    JLabel visitorLabel = new JLabel("Visitors");
+    TextArea dayText = new TextArea();
+    JList catererList = new JList<String>();
+    JList visitorList = new JList<String>();
+    JButton genKeys = new JButton("generate secret keys + pseudonym");
+    JButton genTokens = new JButton("generate tokens");
+    JButton nextDay = new JButton("next day");
+    DefaultListModel defaultCatererList = new DefaultListModel();
+    DefaultListModel defaultVisitorList = new DefaultListModel();
 
     protected RegistrarImpl() throws RemoteException, NoSuchAlgorithmException {
+        setFrame();
         caterers = new HashMap<>();
         visitors = new HashMap<>();
         visitortokenmap = new HashMap<>();
@@ -51,7 +69,63 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         this.privateKey = pair.getPrivate();
         this.publicKey = pair.getPublic();
     }
+    private void setFrame(){
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setBounds(0,0,1000,400);
+        visitorList.setVisible(true);
+        catererList.setVisible(true);
+        catererLabel.setVisible(true);
+        visitorLabel.setVisible(true);
+        dayText.setEditable(false);
+        frame.getContentPane().add(catererLabel);
+        frame.getContentPane().add(catererList);
+        frame.getContentPane().add(visitorLabel);
+        frame.getContentPane().add(visitorList);
+        frame.getContentPane().add(genKeys);
+        frame.getContentPane().add(genTokens);
+        frame.getContentPane().add(dayText);
+        frame.getContentPane().add(nextDay);
 
+        frame.setLayout(new GridLayout(4,2));
+        frame.setSize(1000,400);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+        frame.pack();
+
+        dayText.setText(Integer.toString(day));
+        genKeys.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try{
+                    genSecretKeysAndPseudonym();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+        });
+        genTokens.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    sendTokens();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+        });
+        nextDay.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try{
+                    nextDay();
+                    dayText.setText(Integer.toString(day));
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
     private void startRegistrar() {
         try {
             Registry registry = LocateRegistry.createRegistry(1099);
@@ -85,54 +159,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         Scanner sc = new Scanner(System.in);
         RegistrarImpl registrar = new RegistrarImpl();
         registrar.startRegistrar();
-        while(true){
-            System.out.println("1: Print Caterers");
-            System.out.println("2: Print Visitors");
-            System.out.println("3: Generate secret keys + pseudonym");
-            System.out.println("4: Generate tokens");
-            System.out.println("5: Skip to next day");
-            System.out.println("Enter your choice.");
-            int i = sc.nextInt();
-            switch (i){
-                case 1:
-                    registrar.printCaterers();
-                    break;
-                case 2:
-                    registrar.printVisitors();
-                    break;
-                case 3:
-                    registrar.genSecretKeysAndPseudonym();
-                    break;
-                case 4:
-                    registrar.sendTokens();
-                    break;
-                case 5:
-                    registrar.nextDay();
-                    break;
-            }
-        }
     }
-
-    public void printCaterers() throws RemoteException {
-        if(!caterers.isEmpty()){
-            for(Catering c : caterers.values()){
-                System.out.println(c.getName());
-            }
-        }else {
-            System.out.println("No caterers");
-        }
-    }
-    public void printVisitors() throws RemoteException {
-
-        if(!visitors.isEmpty()){
-            for(Visitor v : visitors.values()){
-                System.out.println(v.getName());
-            }
-        }else {
-            System.out.println("No visitors");
-        }
-    }
-
     //voor elke caterer een nieuwe secret key en pseudoniem generaten
     public void genSecretKeysAndPseudonym() throws IOException, WriterException {
         for(Catering caterer : caterers.values()){
@@ -156,7 +183,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         Map<String, byte[]> catererpseudonymmap = new HashMap<>();
         catererpseudonymmap.put(CF,digest);
         //System.out.println(CF + " " + Base64.getEncoder().encodeToString(digest));
-        System.out.println(digest);
+        //System.out.println(digest);
         //System.out.println(Base64.getDecoder().decode(Base64.getEncoder().encodeToString(digest)));
         pseudonyms.put(day,  catererpseudonymmap);
     }
@@ -195,6 +222,9 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     public void register(Catering caterer) throws RemoteException, IOException, WriterException {
         caterers.put(caterer.getCF(),caterer);
         genSecretKeyAndPseudonym(caterer);
+        defaultCatererList.addElement(caterer.getName());
+        catererList.setModel(defaultCatererList);
+        frame.pack();
     }
 
     @Override
@@ -202,6 +232,9 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         visitors.put(visitor.getNumber(), visitor);
         visitortokenmap.put(visitor.getNumber(), new ArrayList<>());
         sendTokenToNewVisitor(visitor);
+        defaultVisitorList.addElement(visitor.getName());
+        visitorList.setModel(defaultVisitorList);
+        frame.pack();
     }
 
     public void sendTokenToNewVisitor(Visitor visitor) throws RemoteException, InvalidKeyException, SignatureException {
@@ -237,5 +270,4 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     public Map<String, byte[]> downloadPseudonyms(int date) {
         return pseudonyms.get(date);
     }
-
 }

@@ -92,7 +92,6 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
         NameTextField.setEditable(true);
         BuisinessNumberTextField.setEditable(true);
         AddressTextField.setEditable(true);
-        frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
         frame.pack();

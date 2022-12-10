@@ -58,7 +58,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             // fire to localhost port 1099
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
             registrar = (Registrar) myRegistry.lookup("Registrar");
-            registrar.register(this);
+
 
             practitioner = (Practitioner) myRegistry.lookup("Practitioner");
 
@@ -102,7 +102,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             public void actionPerformed(ActionEvent e){
                 try {
                     tryLogIn();
-                } catch (RemoteException ex) {
+                } catch (RemoteException | SignatureException | InvalidKeyException ex) {
                     ex.printStackTrace();
                 }
             }
@@ -165,10 +165,11 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
 //        }
     }
 
-    private void tryLogIn() throws RemoteException {
+    private void tryLogIn() throws RemoteException, SignatureException, InvalidKeyException {
         if(!Objects.equals(NameTextField, "") && !Objects.equals(PhoneTextField, "")){
             this.name = NameTextField.getText();
             this.number = PhoneTextField.getText();
+            registrar.register(this);
             panel.remove(NameLabel);
             panel.remove(NameTextField);
             panel.remove(PhoneTextField);
