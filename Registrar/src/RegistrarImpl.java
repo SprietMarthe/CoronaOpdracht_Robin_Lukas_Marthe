@@ -221,7 +221,6 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         genSecretKeyAndPseudonym(caterer);
         defaultCatererList.addElement(caterer.getName());
         catererList.setModel(defaultCatererList);
-        frame.pack();
     }
 
     @Override
@@ -231,7 +230,6 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         sendTokenToNewVisitor(visitor);
         defaultVisitorList.addElement(visitor.getName());
         visitorList.setModel(defaultVisitorList);
-        frame.pack();
     }
 
     public void sendTokenToNewVisitor(Visitor visitor) throws RemoteException, InvalidKeyException, SignatureException {

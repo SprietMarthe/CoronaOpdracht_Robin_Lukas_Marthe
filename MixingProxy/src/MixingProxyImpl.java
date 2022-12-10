@@ -110,7 +110,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         System.setProperty("javax.net.ssl.keyStorePassword","password");
         MixingProxyImpl mixingProxy = new MixingProxyImpl();
         mixingProxy.startMixingProxy();
-        printMenu(mixingProxy);
+        //printMenu(mixingProxy);
     }
 
     private static void printMenu(MixingProxyImpl mixingProxy) throws RemoteException {
