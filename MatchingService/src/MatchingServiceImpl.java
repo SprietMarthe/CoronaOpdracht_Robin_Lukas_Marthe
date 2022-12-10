@@ -9,10 +9,9 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.*;
 
 public class MatchingServiceImpl extends UnicastRemoteObject implements MatchingService {
     MixingProxy mixer;
@@ -22,11 +21,16 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
     private final HKDF hkdf = HKDF.fromHmacSha256();
     //om zelfde waarde als catering te hashen uit Ri en nym
     private final MessageDigest md = MessageDigest.getInstance("SHA-256");
+    //critische waarden met key de dag, zodat we ze na x dagen kunnen verwijderen
+    Map<Integer, List<Capsule>> criticalCaps = new HashMap<>();
+    Map<Integer, List<Token>> criticalTokens = new HashMap<>();
 
     protected MatchingServiceImpl() throws RemoteException, NoSuchAlgorithmException {
         try {
             // fire to localhost port 1099
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
+            myRegistry.bind("Matcher", this);
+
             registrar = (Registrar) myRegistry.lookup("Registrar");
             registrar.register(this);
 
@@ -39,6 +43,7 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
             mixer.register(this);
 
             //TODO timer schedulen die capsules verwijdert na x aantal dagen
+            //TODO timer schedulen die critische waarden verwijderd na x dagen + tokens die nog over zijn inlichten via registrar
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -58,7 +63,7 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
 
     @Override
     public void sendCapsules(List<Capsule> capsules) throws RemoteException {
-        this.capsules = capsules;
+        this.capsules.addAll(capsules);
     }
 
     @Override
@@ -87,8 +92,39 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
         }
     }
 
-    public void markCapsules(Tuple t){
-
+    @Override
+    public List<Capsule> getCritical() throws RemoteException {
+        List<Capsule> critcap = new ArrayList<>();
+        criticalCaps.values().forEach(critcap::addAll);
+        return critcap;
     }
 
+    @Override
+    public void forwardConfirmedToken(Token conftoken) throws RemoteException {
+        criticalTokens.values().forEach((list) -> {
+                if(list.remove(conftoken)){
+                    System.out.println("token removed");
+                }
+            });
+    }
+
+    public void markCapsules(Tuple t){
+        List<Capsule> newcriticalcaps = new ArrayList<>();
+        List<Token> newcriticaltokens = new ArrayList<>();
+        for(Capsule c : capsules){
+            if(Arrays.equals(c.hash, t.getLocation().hash) && overlap(c.date, t.getLocation().date)){
+                newcriticalcaps.add(c);
+                newcriticaltokens.add(c.token);
+                System.out.println("capsule gemarked");
+            }
+        }
+        criticalCaps.put(LocalDateTime.now().getDayOfYear(), newcriticalcaps);
+        criticalTokens.put(LocalDateTime.now().getDayOfYear(), newcriticaltokens);
+    }
+
+    public boolean overlap(LocalDateTime d1, LocalDateTime d2){
+        long overlap = Math.max(0, Math.min(d1.plusMinutes(30).toEpochSecond(ZoneOffset.MIN),d2.plusMinutes(30).toEpochSecond(ZoneOffset.MIN))-Math.max(d1.toEpochSecond(ZoneOffset.MIN),d2.toEpochSecond(ZoneOffset.MIN))+1);
+        System.out.println(overlap);
+        return overlap > 0;
+    }
 }

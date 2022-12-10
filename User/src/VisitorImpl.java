@@ -14,6 +14,8 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
@@ -21,6 +23,7 @@ import java.util.Timer;
 public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     Registrar registrar;
     Practitioner practitioner;
+    MatchingService matcher;
     String number;
     String name;
     List<Token> tokens = new ArrayList<>();
@@ -32,7 +35,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     boolean onlocation = false;
     //timer om updatecapsules te sturen naar mixer eenmaal op locatie
     Timer t;
-    //lijst met uitgegeven tokens
+    //lijst met uitgegeven tokens, mss niet nodig!
     List<Token> spent = new ArrayList<>();
 
     JFrame frame = new JFrame("Visitor");
@@ -59,6 +62,8 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
             registrar = (Registrar) myRegistry.lookup("Registrar");
             registrar.register(this);
+
+            matcher = (MatchingService) myRegistry.lookup("Matcher");
 
             practitioner = (Practitioner) myRegistry.lookup("Practitioner");
 
@@ -143,26 +148,22 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         System.setProperty("javax.net.ssl.trustStore","truststore");
         System.setProperty("javax.net.ssl.trustStorePassword","trustword");
 
-//        Scanner sc = new Scanner(System.in);
+        Scanner sc = new Scanner(System.in);
         VisitorImpl visitor = new VisitorImpl();
         visitor.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         visitor.frame.setVisible(true);
-//        System.out.println("Enter name:");
-//        visitor.name = sc.nextLine();
-//        System.out.println("Enter unique phone number:");
-//        visitor.number = sc.nextLine();
-//        System.out.println("succesfully signed up!");
-//        int i = 0;
-//        while(true){
-//            System.out.println("1. Scan QR Code");
-//            System.out.println("Enter your choice");
-//            i = sc.nextInt();
-//            switch(i){
-//                case 1:
-//                    visitor.scanQRCode();
-//                    break;
-//            }
-//        }
+
+        int i = 0;
+        while(true){
+            System.out.println("1. haal kritische capsules op");
+            System.out.println("Enter your choice");
+            i = sc.nextInt();
+            switch(i){
+                case 1:
+                    visitor.fetchCriticalCapsules();
+                    break;
+            }
+        }
     }
 
     private void tryLogIn() throws RemoteException {
@@ -269,6 +270,25 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         onlocation = false;
         System.out.println("left location");
         t.cancel();
+    }
+
+    //haal critische tuples op en check ze tegen eigen logs
+    public void fetchCriticalCapsules() throws RemoteException {
+        List<Capsule> critical = matcher.getCritical();
+        for(Capsule c : critical){
+            for(Location l : locationlogs){
+                if(Arrays.equals(c.hash, l.hash) && overlap(c.date, l.date)){
+                    System.out.println("Persoon loopt risico!");
+                    mixer.forwardConfirmedToken(l.token);
+                }
+            }
+        }
+    }
+
+    public boolean overlap(LocalDateTime d1, LocalDateTime d2){
+        long overlap = Math.max(0, Math.min(d1.plusMinutes(30).toEpochSecond(ZoneOffset.MIN),d2.plusMinutes(30).toEpochSecond(ZoneOffset.MIN))-Math.max(d1.toEpochSecond(ZoneOffset.MIN),d2.toEpochSecond(ZoneOffset.MIN))+1);
+        System.out.println(overlap);
+        return overlap > 0;
     }
 
     @Override
