@@ -137,6 +137,11 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         return new byte[0];
     }
 
+    @Override
+    public void forwardConfirmedToken(Token token) throws RemoteException {
+        matcher.forwardConfirmedToken(token);
+    }
+
     private boolean checkCapsule(Capsule c) throws RemoteException, SignatureException, InvalidKeyException {
         boolean good = true;
 

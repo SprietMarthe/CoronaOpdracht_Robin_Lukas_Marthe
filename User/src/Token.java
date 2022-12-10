@@ -28,14 +28,14 @@ public class Token implements Serializable {
         return signature;
     }
 
-    @Override
-    public String toString() {
-        return "Token{" +
-                "random=" + random +
-                ", day=" + day +
-                ", signature=" + signature +
-                '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "Token{" +
+//                "random=" + random +
+//                ", day=" + day +
+//                ", signature=" + signature +
+//                '}';
+//    }
 
     @Override
     public boolean equals(Object o) {

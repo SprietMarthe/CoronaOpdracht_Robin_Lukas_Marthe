@@ -177,10 +177,10 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         byte[] digest = md.digest();
         caterer.setPseudonym(digest);
 
-        //caterer.setPseudonym(Base64.getEncoder().encodeToString(digest));
-        //System.out.println("nym encoded: " + Base64.getEncoder().encodeToString(digest));
-
         Map<String, byte[]> catererpseudonymmap = new HashMap<>();
+        if(pseudonyms.get(day) != null){
+            catererpseudonymmap = pseudonyms.get(day);
+        }
         catererpseudonymmap.put(CF,digest);
         //System.out.println(CF + " " + Base64.getEncoder().encodeToString(digest));
         //System.out.println(digest);
