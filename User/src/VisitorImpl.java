@@ -213,11 +213,11 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             panel.add(p2);
             panel2.setLayout(new GridLayout(2,1));
 
-            panel2.add(infectedText);
-            panel2.add(close);
             panel2.add(scanQRCodeButton);
             panel2.add(releaseLogs);
             panel2.add(logOutButton);
+            panel2.add(infectedText);
+            panel2.add(close);
             frame.add(panel2, BorderLayout.PAGE_END);
             frame.pack();
         }
@@ -302,6 +302,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             for(Location l : locationlogs){
                 if(Arrays.equals(c.hash, l.hash) && overlap(c.date, l.date)){
                     System.out.println("Persoon loopt risico!");
+                    notifyAtRisk();
                     mixer.forwardConfirmedToken(l.token);
                     break;
                 }
