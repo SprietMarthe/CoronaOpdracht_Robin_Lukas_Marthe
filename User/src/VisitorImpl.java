@@ -48,11 +48,13 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     JButton scanQRCodeButton = new JButton("Scan QR code");
     JButton releaseLogs = new JButton("Release Logs to Practioner");
     JButton logOutButton = new JButton("Log out");
+    JButton close = new JButton("Close");
     JLabel PhoneLabel = new JLabel("Unique phone number");
     JLabel NameLabel = new JLabel("Name");
     JLabel IntroLabel = new JLabel("Welkom new visitor");
     JLabel QRLabel = new JLabel("QR code");
     JLabel ImageLabel = new JLabel();
+    JTextArea infectedText = new JTextArea();
 
     public VisitorImpl() throws RemoteException {
         setFrame();
@@ -106,8 +108,9 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(300, 500));
         frame.setLayout(new BorderLayout());
-
+        infectedText.setVisible(false);
         IntroLabel.setVisible(true);
+        close.setVisible(false);
         frame.getContentPane().add(IntroLabel, BorderLayout.PAGE_START);
         panel.setLayout(new GridLayout(2,2));
         panel.add(NameLabel);
@@ -125,7 +128,13 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
 
         frame.setVisible(true);
         frame.pack();
-
+        close.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                infectedText.setVisible(false);
+                close.setVisible(false);
+            }
+        });
         logInButton.addActionListener(new ActionListener(){    //add an event and take action
             public void actionPerformed(ActionEvent e){
                 try {
@@ -203,6 +212,9 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             ImageLabel.setText("Hier komt bewijs!");
             panel.add(p2);
             panel2.setLayout(new GridLayout(2,1));
+
+            panel2.add(infectedText);
+            panel2.add(close);
             panel2.add(scanQRCodeButton);
             panel2.add(releaseLogs);
             panel2.add(logOutButton);
@@ -329,6 +341,10 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     //TODO op gui melding geven van at risk
     public void notifyAtRisk() throws RemoteException {
         System.out.println("registrar zegt dat deze visitor risico loopt!");
+        infectedText.setVisible(true);
+        close.setVisible(true);
+        infectedText.setBackground(Color.RED);
+        infectedText.setText("Je loopt risico op besmetting!");
     }
 
 }

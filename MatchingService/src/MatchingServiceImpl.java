@@ -182,7 +182,7 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
         frame.getContentPane().add(matchingText);
         frame.getContentPane().add(infected);
         frame.getContentPane().add(infectedCapsules);
-        frame.setLayout(new GridLayout(2,2));
+        frame.setLayout(new GridLayout(4,1));
         frame.setSize(700,250);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
