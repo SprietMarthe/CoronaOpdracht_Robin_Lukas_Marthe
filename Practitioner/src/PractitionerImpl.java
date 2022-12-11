@@ -98,7 +98,6 @@ public class PractitionerImpl extends UnicastRemoteObject implements Practitione
         for (Tuple t: tuples) {
             logs.append(t.l).append("\n");
         }
-        System.out.println(String.valueOf(logs));
         logArea.setText(String.valueOf(logs));
         matcher.getTuples(tuples);
     }

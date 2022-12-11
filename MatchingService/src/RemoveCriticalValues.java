@@ -16,7 +16,6 @@ public class RemoveCriticalValues extends TimerTask {
     @Override
     public void run() {
         if (!demo) {
-            System.out.println("removecriticalvaluestimer");
             List<Integer> oldcaps = new ArrayList<>();
             matcher.criticalCaps.forEach((key, value) -> {
                 if (key + 1 < LocalDateTime.now().getDayOfYear()) {
@@ -47,7 +46,6 @@ public class RemoveCriticalValues extends TimerTask {
                 matcher.criticalTokens.remove(key);
             });
         }else{
-            System.out.println("removecriticalvaluestimer");
             List<Integer> oldcaps = new ArrayList<>();
             matcher.criticalCaps.forEach((key, value) -> {
                 oldcaps.add(key);

@@ -266,10 +266,6 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     public void sendCapsule(byte[] hash, Token token, int random, String CF) throws IOException, SignatureException, InvalidKeyException {
-//        System.out.println("time: " + LocalDateTime.now());
-//        System.out.println("token: " + token);
-//        System.out.println("hash: " + Arrays.toString(hash));
-
         Capsule c = new Capsule(token, hash);
         setSignedHash(mixer.sendCapsule(c));
         //elk halfuur nieuwe token sturen naar mixer
@@ -340,11 +336,10 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     @Override
     //TODO op gui melding geven van at risk
     public void notifyAtRisk() throws RemoteException {
-        System.out.println("registrar zegt dat deze visitor risico loopt!");
         infectedText.setVisible(true);
         close.setVisible(true);
         infectedText.setBackground(Color.RED);
-        infectedText.setText("Je loopt risico op besmetting!");
+        infectedText.setText("risico: besmetting!");
     }
 
 }
