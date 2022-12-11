@@ -49,9 +49,9 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
     private PublicKey publicKey;
 
     JFrame frame = new JFrame("Mixing Proxy");
-    JLabel capsulesLabel = new JLabel("Capsules: ");
+    JLabel capsulesLabel = new JLabel("Capsules");
     JList capsulesList = new JList();
-    JButton flushQueue = new JButton("flush queue");
+    JButton flushQueue = new JButton("Flush queue");
     DefaultListModel capsules = new DefaultListModel();
     protected MixingProxyImpl() throws RemoteException, NoSuchAlgorithmException {
         visitors = new HashMap<>();
@@ -97,14 +97,19 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
 
     public void setFrame(){
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setPreferredSize(new Dimension(400, 500));
         capsulesLabel.setVisible(true);
         capsulesList.setVisible(true);
         flushQueue.setVisible(true);
-        frame.getContentPane().add(capsulesLabel);
-        frame.getContentPane().add(capsulesList);
-        frame.getContentPane().add(flushQueue);
+        JPanel p1 = new JPanel();
+        p1.add(capsulesLabel, BorderLayout.PAGE_START);
+        p1.add(capsulesList);
+        frame.add(p1, BorderLayout.CENTER);
+        JPanel p = new JPanel();
+        p.add(flushQueue);
+        frame.add(p, BorderLayout.PAGE_END);
         frame.setLayout(new GridLayout(5,2));
-        frame.setSize(500,200);
+        frame.setSize(400, 500);
         frame.setVisible(true);
 
         flushQueue.addActionListener(new ActionListener() {

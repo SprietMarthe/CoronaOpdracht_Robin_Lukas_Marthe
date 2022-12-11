@@ -106,7 +106,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
 
     private void setFrame() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(300, 400));
+        frame.setPreferredSize(new Dimension(400, 500));
         frame.setLayout(new BorderLayout());
         infectedText.setVisible(false);
         IntroLabel.setVisible(true);
@@ -118,7 +118,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         panel.add(PhoneLabel);
         panel.add(PhoneTextField);
         frame.add(panel);
-        frame.setSize(300,400);
+        frame.setSize(400,500);
         NameTextField.setEditable(true);
         PhoneTextField.setEditable(true);
         frame.getContentPane().add(logInButton, BorderLayout.PAGE_END);
@@ -201,13 +201,13 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
             panel.add(QRLabel);
             JPanel p = new JPanel();
-            p.setPreferredSize(new Dimension(300,30));
-            p.setMaximumSize(new Dimension(300,30));
+//            p.setPreferredSize(new Dimension(300,30));
+//            p.setMaximumSize(new Dimension(300,30));
             p.add(QRTextField);
             panel.add(p);
             JPanel p2 = new JPanel();
-            p2.setPreferredSize(new Dimension(300,300));
-            p2.setMaximumSize(new Dimension(300,300));
+//            p2.setPreferredSize(new Dimension(300,300));
+//            p2.setMaximumSize(new Dimension(300,300));
             p2.add(ImageLabel);
             ImageLabel.setText("Hier komt bewijs!");
             panel.add(p2);

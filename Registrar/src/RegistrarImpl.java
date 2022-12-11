@@ -5,6 +5,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -201,7 +202,8 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
 
     private void setFrame(){
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(400, 500));
+        frame.setPreferredSize(new Dimension(300, 400));
+
         frame.setLayout(new BorderLayout());
         visitorList.setVisible(true);
         visitorList.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -222,7 +224,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         frame.add(panel2, BorderLayout.PAGE_END);
 
         frame.setVisible(true);
-        frame.setSize(400,500);
+        frame.setSize(300, 400);
         dayText.setText(Integer.toString(day));
         genKeys.addActionListener(new ActionListener() {
             @Override

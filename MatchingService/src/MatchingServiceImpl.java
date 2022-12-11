@@ -30,7 +30,7 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
     Map<Integer, List<Token>> criticalTokens = new HashMap<>();
     //UI
     JFrame frame = new JFrame("Matching Service");
-    JLabel matchingProcess = new JLabel("Matching Process: ");
+    JLabel matchingProcess = new JLabel("Matching Process");
     JTextArea matchingText = new JTextArea();
     JLabel infected = new JLabel("Infected Capsules");
     JList infectedCapsules = new JList();
@@ -173,6 +173,7 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
 
     public void setFrame(){
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setPreferredSize(new Dimension(400, 500));
         infected.setVisible(true);
         infectedCapsules.setVisible(true);
         matchingProcess.setVisible(true);
@@ -183,7 +184,7 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
         frame.getContentPane().add(infected);
         frame.getContentPane().add(infectedCapsules);
         frame.setLayout(new GridLayout(4,1));
-        frame.setSize(700,250);
+        frame.setSize(400,500);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }

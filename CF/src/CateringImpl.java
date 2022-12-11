@@ -35,14 +35,14 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
     JTextField BuisinessNumberTextField = new JTextField();
     JTextField AddressTextField = new JTextField();
     JTextField OutputTextField = new JTextField();
-    JButton logInButton = new JButton("log in");
-    JButton getSecretkey = new JButton("secret key");
-    JButton getPseudonym = new JButton("pseudonym");
+    JButton logInButton = new JButton("Log in");
+    JButton getSecretkey = new JButton("Secret key");
+    JButton getPseudonym = new JButton("Pseudonym");
     JButton getQRCode = new JButton("QR code");
     JLabel NameLabel = new JLabel("Name");
     JLabel BuisinessNumberLabel = new JLabel("Buisiness Number");
     JLabel AddressLabel = new JLabel("Address");
-    JLabel OutputLabel = new JLabel("output:");
+    JLabel OutputLabel = new JLabel("Output");
 
     //hashing functie om hash in qrcode te genereren
     MessageDigest md = MessageDigest.getInstance("SHA-256");

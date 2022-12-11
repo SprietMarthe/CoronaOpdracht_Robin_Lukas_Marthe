@@ -59,7 +59,7 @@ public class PractitionerImpl extends UnicastRemoteObject implements Practitione
 
     private void setFrame() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(300, 400));
+        frame.setPreferredSize(new Dimension(400, 500));
         frame.setLayout(new BorderLayout());
 
         logArea.setLineWrap(true);
@@ -68,7 +68,7 @@ public class PractitionerImpl extends UnicastRemoteObject implements Practitione
         logArea.setEditable(false);
         frame.getContentPane().add(textLabel, BorderLayout.PAGE_START);
         frame.add(logArea);
-        frame.setSize(400,400);
+        frame.setSize(400, 500);
         frame.pack();
         frame.setLocationRelativeTo(null); // center
         frame.setVisible(true);
