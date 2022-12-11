@@ -254,6 +254,18 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         return pseudonyms.get(date);
     }
 
+    @Override
+    public void leaveLocation(String number) throws RemoteException {
+        defaultVisitorList.clear();
+        visitors.remove(number);
+        for (Map.Entry<String, Visitor> entry : visitors.entrySet()) {
+            System.out.println("Key = " + entry.getKey() +
+                    ", Value = " + entry.getValue());
+            defaultVisitorList.addElement(entry.getValue().getName());
+        }
+        visitorList.setModel(defaultVisitorList);
+    }
+
     public void nextDay(){
         day += 1;
     }

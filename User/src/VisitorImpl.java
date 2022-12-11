@@ -158,8 +158,13 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
                 QRTextField.setVisible(false);
                 logOutButton.setVisible(false);
                 scanQRCodeButton.setVisible(false);
+                releaseLogs.setVisible(false);
                 ImageLabel.setText("Close window");
-                leaveLocation();
+                try {
+                    leaveLocation();
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
@@ -271,13 +276,14 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         practitioner.getLogs(locationlogs, this.name);
     }
 
-    public void leaveLocation(){
+    public void leaveLocation() throws RemoteException {
         onlocation = false;
         IntroLabel.setText("");
         ImageLabel.setIcon(null);
-        ImageLabel.setText("");
         System.out.println("left location");
-        t.cancel();
+        if (t != null)
+            t.cancel();
+        registrar.leaveLocation(this.number);
     }
 
     //haal critische tuples op en check ze tegen eigen logs
