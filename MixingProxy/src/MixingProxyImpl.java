@@ -14,6 +14,7 @@ import java.security.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 
 class Capsule implements Serializable {
     Token token;
@@ -38,7 +39,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
     private MatchingService matcher;
     private Map<String, Visitor> visitors;
     private List<Capsule> queueCapsules;
-    private List<Token> spent;
+    public List<Token> spent;
     private Registrar registrar;
     //signature om hashes te signen
     private final Signature ecdsaSignature = Signature.getInstance("SHA256withRSA");
@@ -74,7 +75,10 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
             registrar = (Registrar) myRegistry.lookup("Registrar");
 
-            //TODO start timertask die queue flushed naar matching service
+            //timer die queue flushed naar matcher elke dag
+            new Timer().scheduleAtFixedRate(new FlushQueue(this), 0, 24*60*60*1000);
+            //timer die spent tokens verwijdert na 1 dag (minimum)
+            new Timer().scheduleAtFixedRate(new RemoveSpent(this), 0, 24*60*60*1000);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -114,7 +118,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
             }
         });
     }
-    private void flushQueue() throws RemoteException {
+    public void flushQueue() throws RemoteException {
         Collections.shuffle(queueCapsules);
         matcher.sendCapsules(queueCapsules);
         queueCapsules.clear();
