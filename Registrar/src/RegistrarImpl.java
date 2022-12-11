@@ -54,7 +54,6 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     JList visitorList = new JList<String>();
     JButton genKeys = new JButton("generate secret keys + pseudonym");
     JButton genTokens = new JButton("generate tokens");
-    JButton nextDay = new JButton("next day");
     DefaultListModel defaultCatererList = new DefaultListModel();
     DefaultListModel defaultVisitorList = new DefaultListModel();
 
@@ -69,60 +68,13 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         this.privateKey = pair.getPrivate();
         this.publicKey = pair.getPublic();
     }
-    private void setFrame(){
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        visitorList.setVisible(true);
-        catererList.setVisible(true);
-        catererLabel.setVisible(true);
-        visitorLabel.setVisible(true);
-        dayText.setEditable(false);
-        frame.getContentPane().add(catererLabel);
-        frame.getContentPane().add(catererList);
-        frame.getContentPane().add(visitorLabel);
-        frame.getContentPane().add(visitorList);
-        frame.getContentPane().add(genKeys);
-        frame.getContentPane().add(genTokens);
-        frame.getContentPane().add(dayText);
-        frame.getContentPane().add(nextDay);
 
-        frame.setLayout(new GridLayout(4,2));
-        frame.setSize(700,250);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-
-        dayText.setText(Integer.toString(day));
-        genKeys.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try{
-                    genSecretKeysAndPseudonym();
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
-            }
-        });
-        genTokens.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    sendTokens();
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
-            }
-        });
-        nextDay.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try{
-                    nextDay();
-                    dayText.setText(Integer.toString(day));
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
-            }
-        });
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, WriterException, SignatureException, InvalidKeyException {
+        Scanner sc = new Scanner(System.in);
+        RegistrarImpl registrar = new RegistrarImpl();
+        registrar.startRegistrar();
     }
+
     private void startRegistrar() {
         try {
             Registry registry = LocateRegistry.createRegistry(1099);
@@ -130,7 +82,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
 
             try {
                 masterSecretKey = generateMasterKey(256);
-                System.out.println("masterSecretKey: " + masterSecretKey);
+//                System.out.println("masterSecretKey: " + masterSecretKey);
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }
@@ -142,7 +94,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("system is ready");
+        System.out.println("System is ready...");
     }
 
     private static SecretKey generateMasterKey(int n) throws NoSuchAlgorithmException {
@@ -152,11 +104,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         return keyGenerator.generateKey();
     }
 
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, WriterException, SignatureException, InvalidKeyException {
-        Scanner sc = new Scanner(System.in);
-        RegistrarImpl registrar = new RegistrarImpl();
-        registrar.startRegistrar();
-    }
+
     //voor elke caterer een nieuwe secret key en pseudoniem generaten
     public void genSecretKeysAndPseudonym() throws IOException, WriterException {
         for(Catering caterer : caterers.values()){
@@ -205,9 +153,49 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         }
     }
 
-    public void nextDay(){
-        day += 1;
+    private void setFrame(){
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        visitorList.setVisible(true);
+        catererList.setVisible(true);
+        catererLabel.setVisible(true);
+        visitorLabel.setVisible(true);
+        dayText.setEditable(false);
+        frame.getContentPane().add(catererLabel);
+        frame.getContentPane().add(catererList);
+        frame.getContentPane().add(visitorLabel);
+        frame.getContentPane().add(visitorList);
+        frame.getContentPane().add(genKeys);
+        frame.getContentPane().add(genTokens);
+        frame.getContentPane().add(dayText);
+
+        frame.setLayout(new GridLayout(4,2));
+        frame.setSize(700,250);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+
+        dayText.setText(Integer.toString(day));
+        genKeys.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try{
+                    genSecretKeysAndPseudonym();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+        });
+        genTokens.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    sendTokens();
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
+
 
     @Override
     public String helloTo(String name) throws RemoteException, NoSuchAlgorithmException {
@@ -265,4 +253,9 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     public Map<String, byte[]> downloadPseudonyms(int date) {
         return pseudonyms.get(date);
     }
+
+    public void nextDay(){
+        day += 1;
+    }
 }
+

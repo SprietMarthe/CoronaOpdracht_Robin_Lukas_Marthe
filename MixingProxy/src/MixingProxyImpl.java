@@ -70,7 +70,6 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
                     new SslRMIClientSocketFactory(),
                     new SslRMIServerSocketFactory());
             registry.bind("MixingProxy", this);
-            System.out.println("MixingProxy bound in registry");
 
             Registry myRegistry = LocateRegistry.getRegistry("localhost", 1099);
             registrar = (Registrar) myRegistry.lookup("Registrar");
@@ -80,7 +79,18 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("System is ready...");
     }
+
+    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
+        //settings voor ssl connection
+        System.setProperty("javax.net.ssl.keyStore","keystore");
+        System.setProperty("javax.net.ssl.keyStorePassword","password");
+        MixingProxyImpl mixingProxy = new MixingProxyImpl();
+        mixingProxy.startMixingProxy();
+        //printMenu(mixingProxy);
+    }
+
     public void setFrame(){
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         capsulesLabel.setVisible(true);
@@ -104,14 +114,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
             }
         });
     }
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
-        //settings voor ssl connection
-        System.setProperty("javax.net.ssl.keyStore","keystore");
-        System.setProperty("javax.net.ssl.keyStorePassword","password");
-        MixingProxyImpl mixingProxy = new MixingProxyImpl();
-        mixingProxy.startMixingProxy();
-        //printMenu(mixingProxy);
-    }
+
 
     private static void printMenu(MixingProxyImpl mixingProxy) throws RemoteException {
         Scanner s = new Scanner(System.in);

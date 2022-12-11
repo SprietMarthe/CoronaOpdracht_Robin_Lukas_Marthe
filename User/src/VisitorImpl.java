@@ -79,6 +79,28 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         }
     }
 
+    public static void main(String[] args) throws RemoteException {
+        System.setProperty("javax.net.ssl.trustStore","truststore");
+        System.setProperty("javax.net.ssl.trustStorePassword","trustword");
+
+        Scanner sc = new Scanner(System.in);
+        VisitorImpl visitor = new VisitorImpl();
+        visitor.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        visitor.frame.setVisible(true);
+
+        int i = 0;
+        while(true){
+            System.out.println("1. haal kritische capsules op");
+            System.out.println("Enter your choice");
+            i = sc.nextInt();
+            switch(i){
+                case 1:
+                    visitor.fetchCriticalCapsules();
+                    break;
+            }
+        }
+    }
+
     private void setFrame() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(300, 500));
@@ -144,27 +166,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
 
-    public static void main(String[] args) throws RemoteException {
-        System.setProperty("javax.net.ssl.trustStore","truststore");
-        System.setProperty("javax.net.ssl.trustStorePassword","trustword");
 
-        Scanner sc = new Scanner(System.in);
-        VisitorImpl visitor = new VisitorImpl();
-        visitor.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        visitor.frame.setVisible(true);
-
-        int i = 0;
-        while(true){
-            System.out.println("1. haal kritische capsules op");
-            System.out.println("Enter your choice");
-            i = sc.nextInt();
-            switch(i){
-                case 1:
-                    visitor.fetchCriticalCapsules();
-                    break;
-            }
-        }
-    }
 
     private void tryLogIn() throws RemoteException, SignatureException, InvalidKeyException {
         if(!Objects.equals(NameTextField, "") && !Objects.equals(PhoneTextField, "")){
@@ -226,6 +228,8 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     public void scanQRCodeFromGUI() throws IOException, SignatureException, InvalidKeyException {
+        ImageLabel.setText("");
+        ImageLabel.setIcon(null);
         if(!Objects.equals(QRTextField.getText(), "")){
             int random = Integer.parseInt(QRTextField.getText().split("\\|")[0]);
             String CF = QRTextField.getText().split("\\|")[1];
@@ -264,11 +268,14 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     public void releaseLogs(List<Location> locationlogs) throws IOException, SignatureException, InvalidKeyException {
-        practitioner.getLogs(locationlogs);
+        practitioner.getLogs(locationlogs, this.name);
     }
 
     public void leaveLocation(){
         onlocation = false;
+        IntroLabel.setText("");
+        ImageLabel.setIcon(null);
+        ImageLabel.setText("");
         System.out.println("left location");
         t.cancel();
     }

@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface Practitioner extends Remote {
     void register(MatchingService matchingService) throws RemoteException;
-    void getLogs(List<Location> locationlogs) throws SignatureException, InvalidKeyException, RemoteException;
+    void getLogs(List<Location> locationlogs, String visitor) throws SignatureException, InvalidKeyException, RemoteException;
 }

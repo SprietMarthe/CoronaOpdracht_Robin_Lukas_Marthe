@@ -58,6 +58,7 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("System is ready...");
     }
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
         System.setProperty("javax.net.ssl.trustStore","truststore");

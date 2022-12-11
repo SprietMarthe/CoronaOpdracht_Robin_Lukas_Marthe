@@ -60,6 +60,11 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
         }
     }
 
+    public static void main(String[] args) throws RemoteException, NoSuchAlgorithmException {
+        CateringImpl catering = new CateringImpl();
+        //catering.register();
+    }
+
     public void setFrame(){
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setBounds(0,0,1000,400);
@@ -169,10 +174,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
         registrar.register(this);
     }
 
-    public static void main(String[] args) throws RemoteException, NoSuchAlgorithmException {
-        CateringImpl catering = new CateringImpl();
-        //catering.register();
-    }
+
 
     private static void printMenu() throws RemoteException, NoSuchAlgorithmException {
         Scanner s = new Scanner(System.in);

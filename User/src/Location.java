@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 //klasse om gescande QR code te loggen
 public class Location implements Serializable  {
@@ -14,5 +15,16 @@ public class Location implements Serializable  {
         this.CF = CF;
         this.hash = hash;
         this.token = token;
+    }
+
+    @Override
+    public String toString() {
+        return "Location{" +
+                "random=" + random +
+                ", CF='" + CF + '\'' +
+                ", hash=" + Arrays.toString(hash) +
+                ", date=" + date.getDayOfYear() +
+                ", token=" + token +
+                '}';
     }
 }
