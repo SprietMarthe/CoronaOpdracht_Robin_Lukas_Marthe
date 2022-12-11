@@ -114,34 +114,6 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
             }
         });
     }
-
-
-    private static void printMenu(MixingProxyImpl mixingProxy) throws RemoteException {
-        Scanner s = new Scanner(System.in);
-        int choice = 0;
-        System.out.println("-----Mixing Proxy Options-----");
-        while (choice != -1) {
-            System.out.println();
-            System.out.println("1. Exit");
-            System.out.println("2. Show Queue");
-            System.out.println("3. Flush Queue");
-            System.out.println("Enter your choice:");
-            choice = s.nextInt();
-            switch (choice) {
-                case 1:
-                    choice = -1;
-                    break;
-                case 2:
-                    mixingProxy.printQueue();
-                    break;
-                case 3:
-                    mixingProxy.flushQueue();
-                    break;
-            }
-        }
-        s.close();
-    }
-
     private void flushQueue() throws RemoteException {
         Collections.shuffle(queueCapsules);
         matcher.sendCapsules(queueCapsules);

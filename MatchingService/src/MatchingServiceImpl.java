@@ -80,32 +80,35 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
     //krijg tuples van practitioner, zoek betreffende caterer op via registrar mbh CF in tuple, hash R uit tuple en nym die bij CF hoort,
     // check of deze hash overeen komt met hash die visitor al had
     public void getTuples(List<Tuple> tuples) throws RemoteException {
-        //TODO check of er geen null waarden worden gegeven uit de map (kan als info van visitor vals is)
         for(Tuple t : tuples){
-            Map<String, byte[]> pseudonyms = registrar.downloadPseudonyms(t.getLocation().date.getDayOfYear());
-            String tbhash = t.getLocation().random + Arrays.toString(pseudonyms.get(t.getLocation().CF));
-            md.update(tbhash.getBytes(StandardCharsets.UTF_8));
-            byte[] digest = md.digest();
-            matchingText.setText("is "+Arrays.toString(digest)+"\n");
-            matchingText.append("Equal to "+Arrays.toString(t.getLocation().hash)+"\n");
-            frame.pack();
-            if(Arrays.equals(digest, t.getLocation().hash)){
-                matchingText.append("Correct!");
-                System.out.println("hash klopt, correcte informatie verschaft door visitor");
-                markCapsules(t);
-            }
-            else{
-                matchingText.append("Incorrect");
-                System.out.println("hash incorrect!");
-                System.out.println("random tuple: " + t.getLocation().random);
-                System.out.println("nym registrar: " + pseudonyms.get(t.getLocation().CF));
-                System.out.println("CF tuple: " + t.getLocation().CF);
-                System.out.println(digest);
-                System.out.println(t.getLocation().hash);
+            if(t != null) {
+                Map<String, byte[]> pseudonyms = registrar.downloadPseudonyms(t.getLocation().date.getDayOfYear());
+                String tbhash = t.getLocation().random + Arrays.toString(pseudonyms.get(t.getLocation().CF));
+                md.update(tbhash.getBytes(StandardCharsets.UTF_8));
+                byte[] digest = md.digest();
+                matchingText.setText("is " + Arrays.toString(digest) + "\n");
+                matchingText.append("Equal to " + Arrays.toString(t.getLocation().hash) + "\n");
+                frame.pack();
+                if (Arrays.equals(digest, t.getLocation().hash)) {
+                    matchingText.append("Correct!");
+                    System.out.println("hash klopt, correcte informatie verschaft door visitor");
+                    markCapsules(t);
+                } else {
+                    matchingText.append("Incorrect");
+                    System.out.println("hash incorrect!");
+                    System.out.println("random tuple: " + t.getLocation().random);
+                    System.out.println("nym registrar: " + pseudonyms.get(t.getLocation().CF));
+                    System.out.println("CF tuple: " + t.getLocation().CF);
+                    System.out.println(digest);
+                    System.out.println(t.getLocation().hash);
+                }
+            }else{
+                System.out.println("Valse user dus geen tuples");
             }
             try {
                 Thread.sleep(2000);
                 matchingText.setText("");
+
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -125,25 +128,29 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
             int index = list.indexOf(conftoken);
                 if(list.remove(conftoken)){
                     System.out.println("token removed");
-                    infectedList.remove(2*index);
-                    infectedList.remove((2*index)+1);
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    infectedList.removeElement((2*index)+1);
+                    infectedList.removeElement(2*index);
                 }
             });
     }
-
     public void markCapsules(Tuple t){
         List<Capsule> newcriticalcaps = new ArrayList<>();
         List<Token> newcriticaltokens = new ArrayList<>();
         for(Capsule c : capsules){
-            infectedList.addElement("Capsule "+ c.toString());
-            infectedList.addElement("    Token "+c.token.toString());
-            infectedCapsules.setModel(infectedList);
-            frame.pack();
             if(Arrays.equals(c.hash, t.getLocation().hash) && overlap(c.date, t.getLocation().date)){
+                infectedList.addElement("Capsule "+ c.toString());
+                infectedList.addElement("    Token "+c.token.toString());
                 newcriticalcaps.add(c);
                 newcriticaltokens.add(c.token);
             }
         }
+        infectedCapsules.setModel(infectedList);
+        frame.pack();
         if(criticalCaps.get(LocalDateTime.now().getDayOfYear()) != null){
             newcriticalcaps.addAll(criticalCaps.get(LocalDateTime.now().getDayOfYear()));
         }
@@ -166,11 +173,11 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
         infectedCapsules.setVisible(true);
         matchingProcess.setVisible(true);
         matchingText.setVisible(true);
+        matchingText.setEditable(false);
         frame.getContentPane().add(matchingProcess);
         frame.getContentPane().add(matchingText);
         frame.getContentPane().add(infected);
         frame.getContentPane().add(infectedCapsules);
-
         frame.setLayout(new GridLayout(2,2));
         frame.setSize(700,250);
         frame.setLocationRelativeTo(null);
