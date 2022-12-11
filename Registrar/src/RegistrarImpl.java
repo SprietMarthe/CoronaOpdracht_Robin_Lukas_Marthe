@@ -89,7 +89,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
 
     private void spotCheck() {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Kies een facility om te bezoeken:");
+        System.out.println("Kies een facility om te bezoeken (input CF):");
         AtomicInteger index = new AtomicInteger(1);
         caterers.forEach((key, value)->{
             System.out.print(index + ": ");
