@@ -57,7 +57,7 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
             //timer die oude capsules verwijdert elke dag
             new Timer().scheduleAtFixedRate(new RemoveCapsulesMatcher(this), 0, 24*60*60*1000);
             //timer die overgebleven kritische waarden forward naar registrar na 1 dag
-            new Timer().scheduleAtFixedRate(new RemoveCriticalValues(this), 2*60*1000, 24*60*60*1000);
+            new Timer().scheduleAtFixedRate(new RemoveCriticalValues(this), 0, 24*60*60*1000);
 
         } catch (Exception e) {
             e.printStackTrace();

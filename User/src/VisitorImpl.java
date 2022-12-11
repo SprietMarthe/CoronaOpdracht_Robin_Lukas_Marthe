@@ -74,7 +74,8 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             mixer = (MixingProxy) registryMixing.lookup("MixingProxy");
             mixer.register(this);
 
-            //TODO timer schedulen die logs verwijdert na x aantal dagen
+            //timer die logs verwijdert na 2 dagen (checkt wel elke dag)
+            new Timer().scheduleAtFixedRate(new RemoveLogs(this), 0, 24*60*60*1000);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -223,7 +224,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     public void scanQRCode() throws IOException, SignatureException, InvalidKeyException {
-        //TODO niet up to date met volgende functie
+        //TODO niet meer in gebruik normaal
         String input;
         Scanner sc = new Scanner(System.in);
         System.out.println("Enter input");
