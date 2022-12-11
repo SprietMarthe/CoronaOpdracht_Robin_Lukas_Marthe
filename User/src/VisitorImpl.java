@@ -213,11 +213,11 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             panel.add(p2);
             panel2.setLayout(new GridLayout(2,1));
 
-            panel2.add(infectedText);
-            panel2.add(close);
             panel2.add(scanQRCodeButton);
             panel2.add(releaseLogs);
             panel2.add(logOutButton);
+            panel2.add(infectedText);
+            panel2.add(close);
             frame.add(panel2, BorderLayout.PAGE_END);
             frame.pack();
         }
@@ -266,10 +266,6 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     }
 
     public void sendCapsule(byte[] hash, Token token, int random, String CF) throws IOException, SignatureException, InvalidKeyException {
-//        System.out.println("time: " + LocalDateTime.now());
-//        System.out.println("token: " + token);
-//        System.out.println("hash: " + Arrays.toString(hash));
-
         Capsule c = new Capsule(token, hash);
         setSignedHash(mixer.sendCapsule(c));
         //elk halfuur nieuwe token sturen naar mixer
@@ -306,6 +302,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
             for(Location l : locationlogs){
                 if(Arrays.equals(c.hash, l.hash) && overlap(c.date, l.date)){
                     System.out.println("Persoon loopt risico!");
+                    notifyAtRisk();
                     mixer.forwardConfirmedToken(l.token);
                     break;
                 }
@@ -340,11 +337,10 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
     @Override
     //TODO op gui melding geven van at risk
     public void notifyAtRisk() throws RemoteException {
-        System.out.println("registrar zegt dat deze visitor risico loopt!");
         infectedText.setVisible(true);
         close.setVisible(true);
         infectedText.setBackground(Color.RED);
-        infectedText.setText("Je loopt risico op besmetting!");
+        infectedText.setText("risico: besmetting!");
     }
 
 }

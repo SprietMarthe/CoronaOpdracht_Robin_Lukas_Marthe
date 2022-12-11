@@ -251,7 +251,6 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
 
     @Override
     public String helloTo(String name) throws RemoteException, NoSuchAlgorithmException {
-        System.err.println(name + " is trying to contact!");
         return "Server says hello to " + name;
     }
 

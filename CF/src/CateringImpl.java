@@ -31,6 +31,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
     String CF;
 
     JFrame frame = new JFrame("Caterer");
+    JPanel p = new JPanel();
     JTextField NameTextField = new JTextField();
     JTextField BuisinessNumberTextField = new JTextField();
     JTextField AddressTextField = new JTextField();
@@ -67,7 +68,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
 
     public void setFrame(){
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setBounds(0,0,1000,400);
+        frame.setPreferredSize(new Dimension(400,500));
         NameLabel.setBounds(0,20,10,10);
         BuisinessNumberLabel.setBounds(0,0,10,10);
         AddressLabel.setBounds(0,0,10,10);
@@ -76,21 +77,26 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
         AddressTextField.setVisible(true);
         OutputLabel.setVisible(false);
         OutputTextField.setVisible(false);
-        frame.getContentPane().add(NameLabel);
-        frame.getContentPane().add(BuisinessNumberLabel);
-        frame.getContentPane().add(AddressLabel);
-        frame.getContentPane().add(NameTextField);
-        frame.getContentPane().add(BuisinessNumberTextField);
-        frame.getContentPane().add(AddressTextField);
-        frame.getContentPane().add(OutputLabel);
-        frame.getContentPane().add(OutputTextField);
-        frame.getContentPane().add(logInButton);
-        frame.getContentPane().add(getQRCode);
-        frame.getContentPane().add(getPseudonym);
-        frame.getContentPane().add(getSecretkey);
 
-        frame.setLayout(new GridLayout(5,2));
-        frame.setSize(1000,400);
+        p.setLayout(new GridLayout(5,2));
+        p.add(NameLabel);
+        p.add(NameTextField);
+        p.add(BuisinessNumberLabel);
+        p.add(BuisinessNumberTextField);
+        p.add(AddressLabel);
+        p.add(AddressTextField);
+        p.add(OutputLabel);
+        p.add(OutputTextField);
+        p.add(logInButton);
+        frame.add(p, BorderLayout.CENTER);
+        JPanel panel = new JPanel();
+        panel.add(getQRCode);
+        panel.add(getPseudonym);
+        panel.add(getSecretkey);
+        frame.add(panel, BorderLayout.PAGE_END);
+
+
+        frame.setSize(400,500);
         getPseudonym.setVisible(false);
         getSecretkey.setVisible(false);
         getQRCode.setVisible(false);
@@ -105,8 +111,6 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try{
-                    //TODO only generate QR each day
-                    //TODO eigenlijk enkel updaten als genPseudonym is opgeroepen (registrar bepaald wanneer code wordt geupdate)
                     genQRCode();
                 }catch (Exception ex){
                     ex.printStackTrace();
@@ -151,13 +155,13 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
             this.businessNumber = Integer.parseInt(BuisinessNumberTextField.getText());
             this.address = AddressTextField.getText();
             this.CF = businessNumber + name + address;
-            frame.remove(NameTextField);
-            frame.remove(BuisinessNumberTextField);
-            frame.remove(AddressTextField);
-            frame.remove(NameLabel);
-            frame.remove(BuisinessNumberLabel);
-            frame.remove(AddressLabel);
-            frame.remove(logInButton);
+            p.remove(NameTextField);
+            p.remove(BuisinessNumberTextField);
+            p.remove(AddressTextField);
+            p.remove(NameLabel);
+            p.remove(BuisinessNumberLabel);
+            p.remove(AddressLabel);
+            p.remove(logInButton);
             OutputLabel.setVisible(true);
             OutputTextField.setVisible(true);
             getQRCode.setVisible(true);
