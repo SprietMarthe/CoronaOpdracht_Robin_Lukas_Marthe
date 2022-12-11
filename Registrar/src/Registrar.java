@@ -15,6 +15,6 @@ public interface Registrar extends Remote {
     void register(MatchingService matcher) throws RemoteException;
     boolean checkTokenValidity(Token token) throws RemoteException, InvalidKeyException, SignatureException;
     Map<String, byte[]> downloadPseudonyms(int date) throws RemoteException;
-
     void leaveLocation(String visitor) throws RemoteException;
+    void forwardUninformed(Token t) throws RemoteException;
 }

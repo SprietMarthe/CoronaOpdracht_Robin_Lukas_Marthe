@@ -8,5 +8,5 @@ public interface Visitor extends Remote {
     String getName() throws RemoteException;
     void setTokens(List<Token> t) throws RemoteException;
     void setSignedHash(byte[] signedHash) throws IOException;
-
+    void notifyAtRisk() throws RemoteException;
 }

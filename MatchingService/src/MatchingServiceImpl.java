@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.List;
+import java.util.Timer;
 
 public class MatchingServiceImpl extends UnicastRemoteObject implements MatchingService {
     MixingProxy mixer;
@@ -27,6 +28,7 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
     //critische waarden met key de dag, zodat we ze na x dagen kunnen verwijderen
     Map<Integer, List<Capsule>> criticalCaps = new HashMap<>();
     Map<Integer, List<Token>> criticalTokens = new HashMap<>();
+    //UI
     JFrame frame = new JFrame("Matching Service");
     JLabel matchingProcess = new JLabel("Matching Process: ");
     JTextArea matchingText = new JTextArea();
@@ -52,8 +54,10 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
             mixer = (MixingProxy) registryMixing.lookup("MixingProxy");
             mixer.register(this);
 
-            //TODO timer schedulen die capsules verwijdert na x aantal dagen
-            //TODO timer schedulen die critische waarden verwijderd na x dagen + tokens die nog over zijn inlichten via registrar
+            //timer die oude capsules verwijdert elke dag
+            new Timer().scheduleAtFixedRate(new RemoveCapsulesMatcher(this), 0, 24*60*60*1000);
+            //timer die overgebleven kritische waarden forward naar registrar na 1 dag
+            new Timer().scheduleAtFixedRate(new RemoveCriticalValues(this), 2*60*1000, 24*60*60*1000);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -175,5 +179,10 @@ public class MatchingServiceImpl extends UnicastRemoteObject implements Matching
         frame.setSize(700,250);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    public void forwardUninformed(Token t) throws RemoteException {
+        System.out.println("forwarding an uninformed token to registrar");
+        registrar.forwardUninformed(t);
     }
 }

@@ -266,6 +266,22 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         visitorList.setModel(defaultVisitorList);
     }
 
+    @Override
+    public void forwardUninformed(Token t) throws RemoteException {
+        List<String> tonotify = new ArrayList<>();
+
+        visitortokenmap.forEach((key, value)->{
+            if(value.contains(t)){
+                System.out.println("token at risk gevonden");
+                tonotify.add(key);
+            }
+        });
+
+        for(String s : tonotify){
+            visitors.get(s).notifyAtRisk();
+        }
+    }
+
     public void nextDay(){
         day += 1;
     }

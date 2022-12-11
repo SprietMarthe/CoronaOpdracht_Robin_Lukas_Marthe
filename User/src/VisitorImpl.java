@@ -324,4 +324,10 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         ImageLabel.setText("");
     }
 
+    @Override
+    //TODO op gui melding geven van at risk
+    public void notifyAtRisk() throws RemoteException {
+        System.out.println("registrar zegt dat deze visitor risico loopt!");
+    }
+
 }
