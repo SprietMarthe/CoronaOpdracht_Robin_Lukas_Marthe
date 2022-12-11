@@ -202,7 +202,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
 
     private void setFrame(){
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(300, 400));
+        frame.setPreferredSize(new Dimension(400, 500));
 
         frame.setLayout(new BorderLayout());
         visitorList.setVisible(true);
@@ -224,7 +224,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         frame.add(panel2, BorderLayout.PAGE_END);
 
         frame.setVisible(true);
-        frame.setSize(300, 400);
+        frame.setSize(400, 500);
         dayText.setText(Integer.toString(day));
         genKeys.addActionListener(new ActionListener() {
             @Override
