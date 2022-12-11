@@ -4,6 +4,7 @@ import com.google.zxing.WriterException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -48,9 +49,11 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
     private PrivateKey privateKey;
     private PublicKey publicKey;
     JFrame frame = new JFrame("Registrar");
-    JLabel catererLabel = new JLabel("Caterers: ");
+    JPanel panel = new JPanel();
+    JPanel panel2 = new JPanel();
+    JLabel catererLabel = new JLabel("Caterers");
     JLabel visitorLabel = new JLabel("Visitors");
-    TextArea dayText = new TextArea();
+    JLabel dayText = new JLabel();
     JList catererList = new JList<String>();
     JList visitorList = new JList<String>();
     JButton genKeys = new JButton("generate secret keys + pseudonym");
@@ -89,7 +92,7 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
 
     private void spotCheck() {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Kies een facility om te bezoeken (input CF):");
+        System.out.println("Kies een facility om te bezoeken (input CF) or type \"exit\" to leave:");
         AtomicInteger index = new AtomicInteger(1);
         caterers.forEach((key, value)->{
             System.out.print(index + ": ");
@@ -98,24 +101,24 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         });
         String i = "";
         i = sc.nextLine();
+        if (!Objects.equals(i, "exit")){
+            System.out.println(pseudonyms);
+            byte[] nym = pseudonyms.get(LocalDateTime.now().getDayOfYear()).get(i);
+            System.out.println("input gescande QR code:");
+            String scannedQR = sc.nextLine();
+            int random = Integer.parseInt(scannedQR.split("\\|")[0]);
+            byte[] scannedhash = Base64.getDecoder().decode(scannedQR.split("\\|")[2]);
+            String tbhash = random + Arrays.toString(nym);
+            md.update(tbhash.getBytes(StandardCharsets.UTF_8));
+            byte[] digest = md.digest();
 
-        System.out.println(pseudonyms);
-        byte[] nym = pseudonyms.get(LocalDateTime.now().getDayOfYear()).get(i);
-        System.out.println("input gescande QR code:");
-        String scannedQR = sc.nextLine();
-        int random = Integer.parseInt(scannedQR.split("\\|")[0]);
-        byte[] scannedhash = Base64.getDecoder().decode(scannedQR.split("\\|")[2]);
-        String tbhash = random + Arrays.toString(nym);
-        md.update(tbhash.getBytes(StandardCharsets.UTF_8));
-        byte[] digest = md.digest();
-
-        if(Arrays.equals(digest, scannedhash)){
-            System.out.println("pseudonym klopt, alles in orde");
+            if(Arrays.equals(digest, scannedhash)){
+                System.out.println("pseudonym klopt, alles in orde");
+            }
+            else{
+                System.out.println("pseudoniem incorrect, valse QR code!");
+            }
         }
-        else{
-            System.out.println("pseudoniem incorrect, valse QR code!");
-        }
-
     }
 
     private void startRegistrar() {
@@ -198,24 +201,28 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
 
     private void setFrame(){
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setPreferredSize(new Dimension(400, 500));
+        frame.setLayout(new BorderLayout());
         visitorList.setVisible(true);
+        visitorList.setBorder(BorderFactory.createLineBorder(Color.black));
         catererList.setVisible(true);
+        catererList.setBorder(BorderFactory.createLineBorder(Color.black));
         catererLabel.setVisible(true);
         visitorLabel.setVisible(true);
-        dayText.setEditable(false);
-        frame.getContentPane().add(catererLabel);
-        frame.getContentPane().add(catererList);
-        frame.getContentPane().add(visitorLabel);
-        frame.getContentPane().add(visitorList);
-        frame.getContentPane().add(genKeys);
-        frame.getContentPane().add(genTokens);
-        frame.getContentPane().add(dayText);
+        panel.setLayout(new GridLayout(3,2));
+        panel.add(catererLabel);
+        panel.add(catererList);
+        panel.add(visitorLabel);
+        panel.add(visitorList);
+        panel.add(dayText);
+        frame.add(panel, BorderLayout.CENTER);
 
-        frame.setLayout(new GridLayout(4,2));
-        frame.setSize(700,250);
-        frame.setLocationRelativeTo(null);
+        panel2.add(genKeys);
+        panel2.add(genTokens);
+        frame.add(panel2, BorderLayout.PAGE_END);
+
         frame.setVisible(true);
-
+        frame.setSize(400,500);
         dayText.setText(Integer.toString(day));
         genKeys.addActionListener(new ActionListener() {
             @Override

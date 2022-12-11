@@ -106,7 +106,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
 
     private void setFrame() {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(new Dimension(300, 500));
+        frame.setPreferredSize(new Dimension(300, 400));
         frame.setLayout(new BorderLayout());
         infectedText.setVisible(false);
         IntroLabel.setVisible(true);
@@ -118,7 +118,7 @@ public class VisitorImpl extends UnicastRemoteObject implements Visitor {
         panel.add(PhoneLabel);
         panel.add(PhoneTextField);
         frame.add(panel);
-        frame.setSize(600,400);
+        frame.setSize(300,400);
         NameTextField.setEditable(true);
         PhoneTextField.setEditable(true);
         frame.getContentPane().add(logInButton, BorderLayout.PAGE_END);
