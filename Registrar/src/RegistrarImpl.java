@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 import java.util.Timer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
 de registrar maakt één master key aan die het dan telkens gebruikt voor die andere keys per barowner te maken
@@ -73,6 +74,48 @@ public class RegistrarImpl extends UnicastRemoteObject implements Registrar {
         Scanner sc = new Scanner(System.in);
         RegistrarImpl registrar = new RegistrarImpl();
         registrar.startRegistrar();
+        int i = 0;
+        while(true){
+            System.out.println("1. Voer spotcheck uit");
+            System.out.println("Enter your choice");
+            i = sc.nextInt();
+            switch(i){
+                case 1:
+                    registrar.spotCheck();
+                    break;
+            }
+        }
+    }
+
+    private void spotCheck() {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Kies een facility om te bezoeken (input CF):");
+        AtomicInteger index = new AtomicInteger(1);
+        caterers.forEach((key, value)->{
+            System.out.print(index + ": ");
+            System.out.println(key);
+            index.addAndGet(1);
+        });
+        String i = "";
+        i = sc.nextLine();
+
+        System.out.println(pseudonyms);
+        byte[] nym = pseudonyms.get(LocalDateTime.now().getDayOfYear()).get(i);
+        System.out.println("input gescande QR code:");
+        String scannedQR = sc.nextLine();
+        int random = Integer.parseInt(scannedQR.split("\\|")[0]);
+        byte[] scannedhash = Base64.getDecoder().decode(scannedQR.split("\\|")[2]);
+        String tbhash = random + Arrays.toString(nym);
+        md.update(tbhash.getBytes(StandardCharsets.UTF_8));
+        byte[] digest = md.digest();
+
+        if(Arrays.equals(digest, scannedhash)){
+            System.out.println("pseudonym klopt, alles in orde");
+        }
+        else{
+            System.out.println("pseudoniem incorrect, valse QR code!");
+        }
+
     }
 
     private void startRegistrar() {

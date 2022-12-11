@@ -76,7 +76,7 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
             registrar = (Registrar) myRegistry.lookup("Registrar");
 
             //timer die queue flushed naar matcher elke dag
-            new Timer().scheduleAtFixedRate(new FlushQueue(this), 0, 24*60*60*1000);
+            new Timer().scheduleAtFixedRate(new FlushQueue(this), 60*1000, 24*60*60*1000);
             //timer die spent tokens verwijdert na 1 dag (minimum)
             new Timer().scheduleAtFixedRate(new RemoveSpent(this), 0, 24*60*60*1000);
 

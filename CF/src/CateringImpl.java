@@ -223,6 +223,7 @@ public class CateringImpl extends UnicastRemoteObject implements Catering {
                 path.substring(path.lastIndexOf('.') + 1),
                 new File(path));
         OutputTextField.setText(data);
+        System.out.println("qr: " + data);
         System.out.println("random: " + random);
         System.out.println("nym: " + pseudonym);
         System.out.println("CF: " + CF);
