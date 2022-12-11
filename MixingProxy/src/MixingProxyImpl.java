@@ -119,11 +119,13 @@ public class MixingProxyImpl extends UnicastRemoteObject implements MixingProxy{
         });
     }
     public void flushQueue() throws RemoteException {
-        Collections.shuffle(queueCapsules);
-        matcher.sendCapsules(queueCapsules);
-        queueCapsules.clear();
-        capsules.clear();
-        capsulesList.clearSelection();
+        if (!queueCapsules.isEmpty()) {
+            Collections.shuffle(queueCapsules);
+            matcher.sendCapsules(queueCapsules);
+            queueCapsules.clear();
+            capsules.clear();
+            capsulesList.clearSelection();
+        }
     }
 
     private void printQueue() {
